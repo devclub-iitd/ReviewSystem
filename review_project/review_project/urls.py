@@ -15,19 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
-<<<<<<< HEAD
-
-# app_name = 'ratings'
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('ratings/', include('ratings.urls')),
-=======
+from django.conf.urls import url
+from ratings import urls
 # from django import url
 
 app_name  = 'ratings'
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path(r'^ratings/', include('star_ratings.urls', namespace='ratings')),
->>>>>>> 6489e4aa177bcc5c0b637086270cfc6262ecafed
+    url(r'^admin/', admin.site.urls),
+    url(r'', include('ratings.urls')),
 ]

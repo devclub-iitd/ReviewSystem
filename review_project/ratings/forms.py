@@ -19,3 +19,8 @@ class WorkForm(forms.ModelForm):
     class Meta:
         model = models.Work
         fields = ('user', 'work')
+
+class LoginForm(forms.ModelForm):
+    class Meta:
+        model = models.User
+        fields = ('userid', 'password')
