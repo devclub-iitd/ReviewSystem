@@ -10,9 +10,6 @@ from . import forms
 class IndexView(generic.ListView):
     #if logged in, display the current user's details
     def get(self, request):
-
-        
-
         # if request.session['user_id']:
         if 'user_id' in request.session:
             template_name = 'ratings/user.html'
@@ -35,7 +32,7 @@ class LoginView(View):
     # Add user id to session variables
     def get(self,request):
         form = self.form_class(None)
-        return render(request, template_name, {'form':form})
+        return render(request, self.template_name, {'form':form})
 
     def post(self,request):
         form = self.form_class(request.POST)
