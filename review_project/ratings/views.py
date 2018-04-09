@@ -23,6 +23,10 @@ class IndexView(generic.ListView):
         else:
             return redirect('ratings:login')
 
+class UserListView(generic.ListView):
+    model = models.User
+    context_object_name = 'user_list'
+
 class LoginView(View):
     form_class = forms.LoginForm
     template_name = 'ratings/login.html'

@@ -24,9 +24,8 @@
     <!--logo-->
     <div class="navbar-header" >
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#topNavBar">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
+            {% block navbar_items %}
+            {% endblock %}
         </button>
         <a href="{% url 'ratings:index' %}" class="navbar-brand">HOME</a>
      </div>
@@ -54,7 +53,6 @@
 
                 <ul class="nav navbar-nav navbar-right">
                     <!-- <li class="">
-                        <a href="{% url 'ratings:album-add' %}">
                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>&nbsp; Add Album
                         </a>
                     </li> -->

@@ -1,17 +1,18 @@
 {% extends 'ratings/base.html' %}
-{% block title %}Your Details{{ album.id }}{% endblock %}
+{% block title %}User Details{% endblock %}
+
+{% block navbar_items %}
+<span class="icon-bar">Home</span>
+<span class="icon-bar">Users</span>
+<span class="icon-bar">{{ user.userid }}</span>
+{% endblock %}
 
 {% block body %}
-
 <div class="container-fluid songs-container">
-
     <div class="row">
             Hello: {% user.userid %}
             Current: {% current %}
     </div>
-
 </div>
-
-
 {% endblock %}
 
