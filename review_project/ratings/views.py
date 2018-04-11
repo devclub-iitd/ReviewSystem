@@ -51,18 +51,27 @@ class LoginView(View):
         return render(request, self.template_name, {'form':form})
 
     def post(self,request):
-        form = self.form_class(request.POST)
-        if form.is_valid() :
-            form.save()
-            request.session['user_id'] = form.cleaned_data['userid']
-            return redirect('ratings:index')
+        	lowerUsername = (request.POST.get('username')).lower()
+            user = authenticate(request,username=lowerUsername,password=request.POST.get('password'))
+            if (user is not None):
+                login(request,user)
+                return redirect('ratings:index')
+            else:
+                return redirect('ratings:login')
+        # form = self.form_class(request.POST)
+        # if form.is_valid() :
+        #     form.save()
+        #     request.session['user_id'] = form.cleaned_data['userid']
+        #     return redirect('ratings:index')
 
 
 
 class LogoutView(View):
     def get(self, request):
-        del request.session['user_id']
-        return redirect('ratings:user_list')
+        logout(request)
+        return redirect('ratings:list')
+        # del request.session['user_id']
+        # return redirect('ratings:user_list')
 
 # @login_required()
 class UserUpdate(generic.UpdateView):
@@ -81,6 +90,7 @@ class UserDetailView(generic.DetailView):
         # u = request.user
         # cuser = 
         # return render(request, 'myapp/profile.html',context)
+
         if 'user_id' in request.session:
             template_name = 'ratings/user.html'
             try: 
