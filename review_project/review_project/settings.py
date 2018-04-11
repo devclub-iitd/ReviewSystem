@@ -25,7 +25,7 @@ SECRET_KEY = 'n-r**2*ld&9ch^4b&!hjua7dip&dp_&^&b6u=llpve*akw0xjv'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+LOGIN_URL = 'ratings:login'
 ALLOWED_HOSTS = []
 
 
