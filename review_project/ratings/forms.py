@@ -1,13 +1,17 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
 from . import models
 
-class UserForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
+class CustomUserCreationForm(UserCreationForm):
+    class Meta(UserCreationForm.Meta):
+        model = models.Profile
+        fields = UserCreationForm.Meta.fields + ('userid','about',)
 
-    class Meta:
-        model = models.User
-        fields = ('name', 'userid', 'password',  'about')
-
+# class UserForm(forms.ModelForm):
+#     password = forms.CharField(widget=forms.PasswordInput)
+#     class Meta:
+#         model = models.User
+#         fields = ('name', 'userid', 'password',  'about')
 
 class RatingForm(forms.ModelForm):
     # if user1.canRate = 1 and edit if canEdit = 1
@@ -22,5 +26,5 @@ class WorkForm(forms.ModelForm):
 
 class LoginForm(forms.ModelForm):
     class Meta:
-        model = models.User
+        model = models.Profile
         fields = ('userid', 'password')

@@ -4,22 +4,21 @@ from django.views import generic
 from django.views.generic import View
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from django.contrib.auth import authenticate, login, logout
 from . import models
 from . import forms
 
 # Create your views here.
+# @login_required(login_url='/login/')
 class IndexView(generic.ListView):
     #if logged in, display the current user's details
-    @login_required()
+    @method_decorator(login_required)
     def get(self, request):
         template_name = 'ratings/user.html'
-
-
         u = request.user
         cuser = {}
         cuser['name','userid','about','password'] = u.name, u.userid, u.about, u.password
-
 
         # UsrObj = Student(name=u.student.name, department=u.student.department,
         #     DP=u.student.DP,phone=u.student.phone,email=u.student.email,
@@ -33,19 +32,18 @@ class IndexView(generic.ListView):
         # u.student.save()
         return render(request, template_name, {'user': cuser , 'current':True})
         
-        
-        def post(self, request):
-            u = request.user
-            edits = {}
-            edits['userid','password','name','about'] = request.POST.get('userid'), request.POST.get('password'), request.POST.get('name'), request.POST.get('about') 
-            # now create a new user ?
-            # edits['canSee','canRate'] = True, False 
-            u.save(edits)
+    def post(self, request):
+        u = request.user
+        edits = {}
+        edits['userid','password','name','about'] = request.POST.get('userid'), request.POST.get('password'), request.POST.get('name'), request.POST.get('about') 
+        # now create a new user ?
+        # edits['canSee','canRate'] = True, False 
+        u.save(edits)
 
-            return redirect('ratings:index')
+        return redirect('ratings:index')
 
 class UserListView(generic.ListView):
-    model = models.User
+    model = models.Profile
     context_object_name = 'user_list'
 
 class LoginView(View):
@@ -70,8 +68,6 @@ class LoginView(View):
         #     request.session['user_id'] = form.cleaned_data['userid']
         #     return redirect('ratings:index')
 
-
-
 class LogoutView(View):
     def get(self, request):
         logout(request)
@@ -79,18 +75,12 @@ class LogoutView(View):
         # del request.session['user_id']
         # return redirect('ratings:user_list')
 
-# @login_required()
 class UserUpdate(generic.UpdateView):
-    model = models.User
+    model = models.Profile
     fields = ['name','about','updated_at','work']
 
-# class WorkUpdate(generic.UpdateView):
-#     model = models.Work
-#     fields = ['user','work']
-
 class UserDetailView(generic.DetailView):
-    
-    # @login_required()
+    @login_required()
     def get(self, request):
 
         # u = request.user

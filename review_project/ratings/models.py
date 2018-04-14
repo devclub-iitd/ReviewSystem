@@ -1,24 +1,25 @@
 from django.db import models
-from django.contrib.auth.models import User# Create your models here.
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 
-class Profile(models.Model):
-    # userid = models.CharField(primary_key=True,max_length=6)
+class Profile(AbstractUser):
+    userid = models.CharField(primary_key=True,max_length=6,unique=True)
     # password = models.CharField(max_length=256)
-    name = models.CharField(max_length=50)
+    # name = models.CharField(max_length=50)
     about = models.CharField(max_length=200)
-    
     canSee = models.BooleanField()
     canRate = models.BooleanField()
     updated_at = models.DateTimeField(auto_now=True)
+    # user = models.OneToOneField(User, on_delete=models.CASCADE)
+    USERNAME_FIELD = 'userid'
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
     def __str__(self):
-        return self.user.username
+        return self.userid
 
 class Rating(models.Model):
     #user1 rating to user2 
-    user1  = models.ForeignKey(Profile,on_delete=models.CASCADE,related_name='Profile1')
-    user2  = models.ForeignKey(Profile,on_delete=models.CASCADE,related_name='user2')
+    user1  = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='Profile1')
+    user2  = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='user2')
     rating = models.IntegerField()
     # timestamp=models.DateField()
     canEdit = models.BooleanField()
@@ -26,7 +27,7 @@ class Rating(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
 class Work(models.Model):
-    user = models.ForeignKey(Profile,on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
     work = models.CharField(max_length=500)
     # timestamp = models.DateField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)

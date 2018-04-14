@@ -72,6 +72,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'review_project.wsgi.application'
 
+AUTH_USER_MODEL = 'ratings.Profile'
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
