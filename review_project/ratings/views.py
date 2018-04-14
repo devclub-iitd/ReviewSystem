@@ -41,6 +41,11 @@ class LoginView(View):
     def post(self,request):
         form = self.form_class(request.POST)
 
+        # print("-----------------------------------------------------")
+        # print (form.cleaned_data)
+        # print (form.cleaned_data['userid'])
+        # print (form.cleaned_data['password'])
+
         if form.is_valid() :
             # form.save()
             uid = form.cleaned_data['userid']
@@ -59,11 +64,20 @@ class LoginView(View):
                 return render(request, self.template_name, { 'form': form ,'error_message': "User ID doesn't exist."})
 
             return redirect('ratings:index')
+        else : 
+            print("-----------------------------------------------------")
+            print (form)
+            print (request.session['user_id'])
+            return redirect('ratings:login')
 
 class LogoutView(View):
     def get(self, request):
-        del request.session['user_id']
-        return redirect('ratings:user_list')
+        try: 
+            if request.session['user_id']:
+                del request.session['user_id']
+        except Exception:
+            pass
+        return redirect('ratings:login')
 
 
 class RegisterView(View):
@@ -85,6 +99,8 @@ class RegisterView(View):
             uobj.save()
             request.session['user_id'] = fd['userid']
             return redirect('ratings:index')
+        else :
+            return redirect('ratings:register')
 
 
 class UserUpdate(generic.UpdateView):
@@ -99,29 +115,36 @@ class WorkUpdate(generic.UpdateView):
 
 
 class UserDetailView(generic.DetailView):
+    form_class = forms.RatingForm
+
     def get(self, request,**kwargs):
+        form = self.form_class(None)
         template_name = 'ratings/user.html'
-        eid = kwargs['eid'] # target user
+        uid = kwargs['uid'] # target user
         if 'user_id' in request.session:
             try: 
-                user = models.User.objects.get(enum_id=eid)
+                user = models.User.objects.get(userid=uid)
             except ObjectDoesNotExist:
-                return render(request, error_template ,{'error': "The User for primary key : "+ eid +" does not exist."})
+                return render(request, error_template ,{'error': "The User for primary key : "+ uid +" does not exist."})
             
                 # user = models.User.objects.get(userid=request.GET.get('user','None'))
             try:
                 ratings = models.Rating.objects.all().filter(user1=request.session['user_id']).filter(user2=user).order_by('-updated_at')
-                current_rating = ratings[0].rating
             except ObjectDoesNotExist:
+                current_rating = "Not yet rated by you."
+            try: 
+                current_rating = ratings[0].rating
+            except :
                 current_rating = "Not yet rated by you."
             try : 
                 works = models.Work.objects.all().filter(user=user).order_by('-updated_at')
             except :
                 works = None
-            return render(request, template_name, {'user':user, 'current':False, 'current_rated':current_rating, 'works':works})
+            return render(request, template_name, {'user':user, 'current':False, 'current_rated':current_rating, 'works':works, 'form':form})
+        
         else:
             # if not logged in redirect to url(/login)
-            user = models.User.objects.get(enum_id=eid)
+            user = models.User.objects.get(userid=uid)
             try : 
                 works = models.Work.objects.all().filter(user=user).order_by('-updated_at')
             except :

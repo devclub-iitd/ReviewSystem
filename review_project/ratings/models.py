@@ -1,12 +1,12 @@
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator 
 
 # Create your models here.
 class User(models.Model):
-    userid = models.CharField(primary_key=True,max_length=6)
-    password = models.CharField(max_length=256)
     name = models.CharField(max_length=50)
+    userid = models.CharField(primary_key=True,max_length=6,unique=True)
     about = models.CharField(max_length=200)
-    enum_id = models.AutoField()
+    password = models.CharField(max_length=256)
 
     canSee = models.BooleanField()
     canRate = models.BooleanField()
@@ -17,7 +17,8 @@ class User(models.Model):
 class Rating(models.Model):
     user1  = models.ForeignKey(User,on_delete=models.CASCADE,related_name='user1')
     user2  = models.ForeignKey(User,on_delete=models.CASCADE,related_name='user2')
-    rating = models.IntegerField()
+    rating = models.PositiveIntegerField(default=5, validators=[MinValueValidator(1), MaxValueValidator(10)])
+    # rating = models.IntegerField()
     # timestamp=models.DateField()
     canEdit = models.BooleanField()
     created_at = models.DateTimeField(auto_now_add=True)

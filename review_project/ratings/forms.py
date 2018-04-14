@@ -21,7 +21,7 @@ class WorkForm(forms.ModelForm):
         fields = ('user', 'work')
 
 class LoginForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
+    # password = forms.CharField(widget=forms.PasswordInput)
     
     class Meta:
         model = models.User
