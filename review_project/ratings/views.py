@@ -6,6 +6,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from . import models
 from . import forms
 
+
+error_template = 'ratings/error.html'
+
 # Create your views here.
 class IndexView(generic.ListView):
     #if logged in, display the current user's details
@@ -16,7 +19,7 @@ class IndexView(generic.ListView):
             try:
                 current_user = models.User.objects.get(userid=request.session['user_id'])        
             except ObjectDoesNotExist:
-                return render(request, 'ratings/error.html',{'error': "The User for user_id : "+request.session['user_id']+" DoesNotExist. "})
+                return render(request, error_template ,{'error': "The User for user_id : "+request.session['user_id']+" DoesNotExist. "})
 
             return render(request, template_name, {'user':current_user , 'current':True})
         #if not logged in redirect to url(/login)
@@ -92,21 +95,41 @@ class WorkUpdate(generic.UpdateView):
     model = models.Work
     fields = ['user','work']
 
+# class UserList()
+
+
 class UserDetailView(generic.DetailView):
-    def get(self, request):
+    def get(self, request,**kwargs):
+        template_name = 'ratings/user.html'
+        eid = kwargs['eid'] # target user
         if 'user_id' in request.session:
-            template_name = 'ratings/user.html'
             try: 
-                user = models.User.objects.get(userid=request.GET.get('user','None'))
+                user = models.User.objects.get(enum_id=eid)
+            except ObjectDoesNotExist:
+                return render(request, error_template ,{'error': "The User for primary key : "+ eid +" does not exist."})
+            
+                # user = models.User.objects.get(userid=request.GET.get('user','None'))
+            try:
                 ratings = models.Rating.objects.all().filter(user1=request.session['user_id']).filter(user2=user).order_by('-updated_at')
                 current_rating = ratings[0].rating
-                works = models.Work.objects.all().filter(user=user).order_by('-updated_at')
             except ObjectDoesNotExist:
-                return render(request, 'ratings/error.html',{'error': "The User for user_id : "+request.session['user_id']+" does not exist."})
+                current_rating = "Not yet rated by you."
+            try : 
+                works = models.Work.objects.all().filter(user=user).order_by('-updated_at')
+            except :
+                works = None
             return render(request, template_name, {'user':user, 'current':False, 'current_rated':current_rating, 'works':works})
         else:
             # if not logged in redirect to url(/login)
-            return redirect('ratings:login')  
+            user = models.User.objects.get(enum_id=eid)
+            try : 
+                works = models.Work.objects.all().filter(user=user).order_by('-updated_at')
+            except :
+                works = None
+            return render(request, template_name, {'user':user, 'current':False, 'works':works})
+    
+    def post(self, request):
+        pass
     # Get ratings for this user, rated by the session user
     # Edit the user details if the user id of the current view is the same as the session user
     # Edit the work details if the user id of the current view is the same as the session user
