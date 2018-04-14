@@ -4,14 +4,13 @@
 {% block navbar_items %}
 <span class="icon-bar">Home</span>
 <span class="icon-bar">Users</span>
-<span class="icon-bar">{{ user.userid }}</span>
 {% endblock %}
 
 {% block body %}
 <div class="container-fluid songs-container">
     <div class="row">
-            Hello: {% user.userid %}
-            Current: {% current %}
+            Hello: {{ user.name }}
+            About: {{ user.about }}
     </div>
 </div>
 {% endblock %}

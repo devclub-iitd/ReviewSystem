@@ -6,7 +6,7 @@ class UserForm(forms.ModelForm):
 
     class Meta:
         model = models.User
-        fields = ('name', 'userid', 'password',  'about')
+        fields = ('userid', 'password', 'name',  'about')
 
 
 class RatingForm(forms.ModelForm):
@@ -21,6 +21,8 @@ class WorkForm(forms.ModelForm):
         fields = ('user', 'work')
 
 class LoginForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput)
+    
     class Meta:
         model = models.User
         fields = ('userid', 'password')

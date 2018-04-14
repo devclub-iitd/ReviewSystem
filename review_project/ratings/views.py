@@ -39,14 +39,50 @@ class LoginView(View):
         form = self.form_class(request.POST)
 
         if form.is_valid() :
-            form.save()
-            request.session['user_id'] = form.cleaned_data['userid']
+            # form.save()
+            uid = form.cleaned_data['userid']
+            paswd = form.cleaned_data['password']
+            try: 
+                uobj = models.User.objects.get(userid=uid)
+                if(uobj):
+                    if(uobj.password == paswd) : 
+                        request.session['user_id'] = form.cleaned_data['userid']
+                        return redirect('ratings:index')
+                    else :
+                        return render(request, self.template_name, {'error_message': "Password doesn't match"})
+                else :
+                    return render(request, self.template_name, {'form': form ,'error_message': "User doesn't exist."})
+            except ObjectDoesNotExist : 
+                return render(request, self.template_name, { 'form': form ,'error_message': "User ID doesn't exist."})
+
             return redirect('ratings:index')
 
 class LogoutView(View):
     def get(self, request):
         del request.session['user_id']
         return redirect('ratings:user_list')
+
+
+class RegisterView(View):
+    form_class = forms.UserForm
+    template_name = 'ratings/register.html'
+    # Add user id to session variables
+    def get(self,request):
+        form = self.form_class(None)
+        return render(request, self.template_name, {'form':form})
+
+    def post(self,request):
+        form = self.form_class(request.POST)
+
+        if form.is_valid() :
+            # form.save()
+            fd = form.cleaned_data
+            uobj = models.User(name=fd['name'],userid=fd['userid'],about=fd['about'],
+                                password=fd['password'],canSee=False,canRate=False)
+            uobj.save()
+            request.session['user_id'] = fd['userid']
+            return redirect('ratings:index')
+
 
 class UserUpdate(generic.UpdateView):
     model = models.User
