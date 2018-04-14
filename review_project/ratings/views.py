@@ -28,15 +28,21 @@ class IndexView(generic.ListView):
         # # print int(request.FILES.get('dp').size)<6000000
         # u.student.name = request.POST.get('name')
         # u.student.phone = request.POST.get('phone')
-        # u.student.email = request.POST.get('email')
+        # u.student.email = reqst.POST.get('email')
         # u.student.oneliner = request.POST.get('oneliner')
         # u.student.save()
         return render(request, template_name, {'user': cuser , 'current':True})
         
         
         def post(self, request):
-            pass
+            u = request.user
+            edits = {}
+            edits['userid','password','name','about'] = request.POST.get('userid'), request.POST.get('password'), request.POST.get('name'), request.POST.get('about') 
+            # now create a new user ?
+            # edits['canSee','canRate'] = True, False 
+            u.save(edits)
 
+            return redirect('ratings:index')
 
 class UserListView(generic.ListView):
     model = models.User
@@ -51,13 +57,13 @@ class LoginView(View):
         return render(request, self.template_name, {'form':form})
 
     def post(self,request):
-        	lowerUsername = (request.POST.get('username')).lower()
-            user = authenticate(request,username=lowerUsername,password=request.POST.get('password'))
-            if (user is not None):
-                login(request,user)
-                return redirect('ratings:index')
-            else:
-                return redirect('ratings:login')
+        lowerUsername = (request.POST.get('userid')).lower()
+        user = authenticate(request,username=lowerUsername,password=request.POST.get('password'))
+        if (user is not None):
+            login(request,user)
+            return redirect('ratings:index')
+        else:
+            return redirect('ratings:login')
         # form = self.form_class(request.POST)
         # if form.is_valid() :
         #     form.save()
