@@ -17,9 +17,11 @@ class IndexView(generic.ListView):
     def get(self, request):
         template_name = 'ratings/user.html'
         u = request.user
-        cuser = {}
-        cuser['name','userid','about','password'] = u.name, u.userid, u.about, u.password
-
+        print ("Entered Index")
+        print (u.username)
+        # cuser = {}
+        # cuser['first_name','username','about','password'] = u.first_name, u.username, u.about, u.password
+        # print (cuser[username])
         # UsrObj = Student(name=u.student.name, department=u.student.department,
         #     DP=u.student.DP,phone=u.student.phone,email=u.student.email,
         #     oneliner=u.student.oneliner,genPic1=u.student.genPic1,genPic2=u.student.genPic2)
@@ -30,9 +32,10 @@ class IndexView(generic.ListView):
         # u.student.email = reqst.POST.get('email')
         # u.student.oneliner = request.POST.get('oneliner')
         # u.student.save()
-        return render(request, template_name, {'user': cuser , 'current':True})
+        return render(request, template_name, {'user': u , 'current':True})
         
     def post(self, request):
+        print ("Post request in index")
         u = request.user
         edits = {}
         edits['userid','password','name','about'] = request.POST.get('userid'), request.POST.get('password'), request.POST.get('name'), request.POST.get('about') 
@@ -46,6 +49,26 @@ class UserListView(generic.ListView):
     model = models.Profile
     context_object_name = 'user_list'
 
+class RegisterView(View):
+    form_class = forms.CustomUserCreationForm
+    template_name = 'ratings/login.html'
+    # Add user id to session variables
+    def get(self,request):
+        form = self.form_class(None)
+        return render(request, self.template_name, {'form':form})
+
+    def post(self,request):
+        print ("Received Post Request")
+        form = self.form_class(request.POST)
+
+        if form.is_valid():
+            # fd = form.cleaned_data
+            # obj = models.Profile(username=fd['username'],password=fd['password'],about=fd['about'],canSee=True,canRate=True)
+            form.save()
+            return redirect('ratings:login')
+        else:
+            return render(request, self.template_name, {'form':form})
+
 class LoginView(View):
     form_class = forms.LoginForm
     template_name = 'ratings/login.html'
@@ -55,8 +78,9 @@ class LoginView(View):
         return render(request, self.template_name, {'form':form})
 
     def post(self,request):
-        lowerUsername = (request.POST.get('userid')).lower()
-        user = authenticate(request,username=lowerUsername,password=request.POST.get('password'))
+        # lowerUsername = (request.POST.get('userid')).lower()
+        # print (lowerUsername)
+        user = authenticate(username=request.POST['username'],password=request.POST['password'])
         if (user is not None):
             login(request,user)
             return redirect('ratings:index')

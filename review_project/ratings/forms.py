@@ -5,7 +5,7 @@ from . import models
 class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = models.Profile
-        fields = UserCreationForm.Meta.fields + ('userid','about',)
+        fields = UserCreationForm.Meta.fields + ('about',)
 
 # class UserForm(forms.ModelForm):
 #     password = forms.CharField(widget=forms.PasswordInput)
@@ -27,4 +27,4 @@ class WorkForm(forms.ModelForm):
 class LoginForm(forms.ModelForm):
     class Meta:
         model = models.Profile
-        fields = ('userid', 'password')
+        fields = ('username', 'password')
