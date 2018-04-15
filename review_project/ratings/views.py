@@ -36,12 +36,16 @@ class LoginView(View):
     # Add user id to session variables
     def get(self,request):
         form = self.form_class(None)
+        print("-----------------------------------------------------")
+        print (form) # this turned out to be null
+        
         return render(request, self.template_name, {'form':form})
 
     def post(self,request):
         form = self.form_class(request.POST)
 
-        # print("-----------------------------------------------------")
+        print("-----------------------------------------------------")
+        print (form) # this turned out to be null
         # print (form.cleaned_data)
         # print (form.cleaned_data['userid'])
         # print (form.cleaned_data['password'])
@@ -67,7 +71,7 @@ class LoginView(View):
         else : 
             print("-----------------------------------------------------")
             print (form)
-            print (request.session['user_id'])
+            # print (request.session['user_id'])
             return redirect('ratings:login')
 
 class LogoutView(View):

@@ -20,9 +20,18 @@ class WorkForm(forms.ModelForm):
         model = models.Work
         fields = ('user', 'work')
 
-class LoginForm(forms.ModelForm):
-    # password = forms.CharField(widget=forms.PasswordInput)
+# class LoginForm(forms.ModelForm):
+#     password = forms.CharField(widget=forms.PasswordInput)
     
-    class Meta:
-        model = models.User
-        fields = ('userid', 'password')
+#     class Meta:
+#         model = models.User
+#         fields = ('userid', 'password')
+
+
+class LoginForm(forms.Form):
+    userid = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
+    
+    # class Meta:
+    #     model = models.User
+    #     fields = ('userid', 'password')
