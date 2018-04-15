@@ -6,6 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from . import models
 from . import forms
 
@@ -18,20 +19,7 @@ class IndexView(generic.ListView):
         template_name = 'ratings/user.html'
         u = request.user
         print ("Entered Index")
-        print (u.username)
-        # cuser = {}
-        # cuser['first_name','username','about','password'] = u.first_name, u.username, u.about, u.password
-        # print (cuser[username])
-        # UsrObj = Student(name=u.student.name, department=u.student.department,
-        #     DP=u.student.DP,phone=u.student.phone,email=u.student.email,
-        #     oneliner=u.student.oneliner,genPic1=u.student.genPic1,genPic2=u.student.genPic2)
-        #     context={"user":UsrObj}
-        # # print int(request.FILES.get('dp').size)<6000000
-        # u.student.name = request.POST.get('name')
-        # u.student.phone = request.POST.get('phone')
-        # u.student.email = reqst.POST.get('email')
-        # u.student.oneliner = request.POST.get('oneliner')
-        # u.student.save()
+        print (u.profile.userid)
         return render(request, template_name, {'user': u , 'current':True})
         
     def post(self, request):
@@ -50,24 +38,30 @@ class UserListView(generic.ListView):
     context_object_name = 'user_list'
 
 class RegisterView(View):
-    form_class = forms.CustomUserCreationForm
-    template_name = 'ratings/login.html'
-    # Add user id to session variables
+    # form_class_user = forms.UserForm
+    form_class_profile = forms.ProfileForm
+    # template_name = 'ratings/register.html'
+    template_name = 'registration/login.html'
     def get(self,request):
-        form = self.form_class(None)
-        return render(request, self.template_name, {'form':form})
+        # form_user = self.form_class_user(None)
+        form_profile = self.form_class_profile(None)
+        return render(request, self.template_name, {'form':form_profile})
 
     def post(self,request):
         print ("Received Post Request")
-        form = self.form_class(request.POST)
+        # form_user = self.form_class_user(request.POST)
+        form_profile = self.form_class_profile(request.POST)
 
-        if form.is_valid():
-            # fd = form.cleaned_data
-            # obj = models.Profile(username=fd['username'],password=fd['password'],about=fd['about'],canSee=True,canRate=True)
-            form.save()
-            return redirect('ratings:login')
+        if form_profile.is_valid():
+            form_profile.save()
+            username = form_profile.cleaned_data.get('username')
+            raw_password = form_profile.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            print ("Logged in")
+            return redirect('ratings:index')
         else:
-            return render(request, self.template_name, {'form':form})
+            return render(request, self.template_name, {'userform':form_user,'profileform':form_profile})
 
 class LoginView(View):
     form_class = forms.LoginForm
@@ -80,24 +74,22 @@ class LoginView(View):
     def post(self,request):
         # lowerUsername = (request.POST.get('userid')).lower()
         # print (lowerUsername)
-        user = authenticate(username=request.POST['username'],password=request.POST['password'])
+        username = request.POST['username']
+        password = request.POST['password']
+        print (username)
+        print (password)
+        user = User.objects.filter(username=request.POST['username'],password=request.POST['password'])
         if (user is not None):
             login(request,user)
             return redirect('ratings:index')
         else:
+            print ("User is not found")
             return redirect('ratings:login')
-        # form = self.form_class(request.POST)
-        # if form.is_valid() :
-        #     form.save()
-        #     request.session['user_id'] = form.cleaned_data['userid']
-        #     return redirect('ratings:index')
 
 class LogoutView(View):
     def get(self, request):
         logout(request)
-        return redirect('ratings:list')
-        # del request.session['user_id']
-        # return redirect('ratings:user_list')
+        return redirect('ratings:user_list')
 
 class UserUpdate(generic.UpdateView):
     model = models.Profile

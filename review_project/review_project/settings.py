@@ -26,6 +26,7 @@ SECRET_KEY = 'n-r**2*ld&9ch^4b&!hjua7dip&dp_&^&b6u=llpve*akw0xjv'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 LOGIN_URL = 'ratings:login'
+LOGIN_REDIRECT_URL = 'index'
 ALLOWED_HOSTS = []
 
 
@@ -72,7 +73,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'review_project.wsgi.application'
 
-AUTH_USER_MODEL = 'ratings.Profile'
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend']
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
