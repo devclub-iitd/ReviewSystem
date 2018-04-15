@@ -99,7 +99,7 @@ class RegisterView(View):
             # form.save()
             fd = form.cleaned_data
             uobj = models.User(name=fd['name'],userid=fd['userid'],about=fd['about'],
-                                password=fd['password'],canSee=False,canRate=False)
+                                password=fd['password'],canSee=False,canRate=True)
             uobj.save()
             request.session['user_id'] = fd['userid']
             return redirect('ratings:index')
