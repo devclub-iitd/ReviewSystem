@@ -11,8 +11,6 @@ class Profile(models.Model):
     canSee = models.BooleanField(default=True)
     canRate = models.BooleanField(default=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # USERNAME_FIELD = 'userid'
-    # REQUIRED_FIELDS = ('user')
 
     def __str__(self):
         return self.userid

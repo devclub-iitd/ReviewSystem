@@ -28,9 +28,7 @@ class IndexView(generic.ListView):
         edits = {}
         edits['userid','password','name','about'] = request.POST.get('userid'), request.POST.get('password'), request.POST.get('name'), request.POST.get('about') 
         # now create a new user ?
-        # edits['canSee','canRate'] = True, False 
         u.save(edits)
-
         return redirect('ratings:index')
 
 class UserListView(generic.ListView):
@@ -38,18 +36,14 @@ class UserListView(generic.ListView):
     context_object_name = 'user_list'
 
 class RegisterView(View):
-    # form_class_user = forms.UserForm
     form_class_profile = forms.ProfileForm
-    # template_name = 'ratings/register.html'
     template_name = 'registration/login.html'
     def get(self,request):
-        # form_user = self.form_class_user(None)
         form_profile = self.form_class_profile(None)
         return render(request, self.template_name, {'form':form_profile})
 
     def post(self,request):
         print ("Received Post Request")
-        # form_user = self.form_class_user(request.POST)
         form_profile = self.form_class_profile(request.POST)
 
         if form_profile.is_valid():
@@ -63,33 +57,32 @@ class RegisterView(View):
         else:
             return render(request, self.template_name, {'userform':form_user,'profileform':form_profile})
 
-class LoginView(View):
-    form_class = forms.LoginForm
-    template_name = 'ratings/login.html'
-    # Add user id to session variables
-    def get(self,request):
-        form = self.form_class(None)
-        return render(request, self.template_name, {'form':form})
+# ---------------------------------Redundant Classes-------------------------------------
+# class LoginView(View):
+#     form_class = forms.LoginForm
+#     template_name = 'ratings/login.html'
+#     # Add user id to session variables
+#     def get(self,request):
+#         form = self.form_class(None)
+#         return render(request, self.template_name, {'form':form})
 
-    def post(self,request):
-        # lowerUsername = (request.POST.get('userid')).lower()
-        # print (lowerUsername)
-        username = request.POST['username']
-        password = request.POST['password']
-        print (username)
-        print (password)
-        user = User.objects.filter(username=request.POST['username'],password=request.POST['password'])
-        if (user is not None):
-            login(request,user)
-            return redirect('ratings:index')
-        else:
-            print ("User is not found")
-            return redirect('ratings:login')
+#     def post(self,request):
+#         username = request.POST['username']
+#         password = request.POST['password']
+#         print (username)
+#         print (password)
+#         user = User.objects.filter(username=request.POST['username'],password=request.POST['password'])
+#         if (user is not None):
+#             login(request,user)
+#             return redirect('ratings:index')
+#         else:
+#             print ("User is not found")
+#             return redirect('ratings:login')
 
-class LogoutView(View):
-    def get(self, request):
-        logout(request)
-        return redirect('ratings:user_list')
+# class LogoutView(View):
+#     def get(self, request):
+#         logout(request)
+#         return redirect('ratings:user_list')
 
 class UserUpdate(generic.UpdateView):
     model = models.Profile
@@ -98,11 +91,9 @@ class UserUpdate(generic.UpdateView):
 class UserDetailView(generic.DetailView):
     @login_required()
     def get(self, request):
-
         # u = request.user
         # cuser = 
         # return render(request, 'myapp/profile.html',context)
-
         if 'user_id' in request.session:
             template_name = 'ratings/user.html'
             try: 
