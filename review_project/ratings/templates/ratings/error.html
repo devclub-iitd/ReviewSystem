@@ -1,0 +1,30 @@
+{% extends 'ratings/base.html' %}
+{% block title %}Error{% endblock %}
+
+{% block navbar_items %}
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    <div class="row">
+
+        <div class="col-sm-12 col-md-7">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h3>Error : You have been redirected to this page with the following error message :  </h3>
+                        <p><strong>{{ error }}</strong></p>
+                    
+                        
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+

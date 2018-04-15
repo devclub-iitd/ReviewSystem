@@ -13,7 +13,8 @@ class RatingForm(forms.ModelForm):
     # if user1.canRate = 1 and edit if canEdit = 1
     class Meta:
         model = models.Rating
-        fields = ('user1', 'user2', 'rating')
+        # fields = ('user1', 'user2', 'rating')
+        fields = ('rating', )
 
 class WorkForm(forms.ModelForm):
     class Meta:

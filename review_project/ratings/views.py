@@ -122,9 +122,9 @@ class UserDetailView(generic.DetailView):
     form_class = forms.RatingForm
 
     def get(self, request,**kwargs):
-        form = self.form_class(None)
         template_name = 'ratings/user.html'
         uid = kwargs['uid'] # target user
+
         if 'user_id' in request.session:
             try: 
                 user = models.User.objects.get(userid=uid)
@@ -135,7 +135,7 @@ class UserDetailView(generic.DetailView):
             try:
                 ratings = models.Rating.objects.all().filter(user1=request.session['user_id']).filter(user2=user).order_by('-updated_at')
             except ObjectDoesNotExist:
-                current_rating = "Not yet rated by you."
+                current_rating = "Not yet rated by you. Rating Object after these filters doesn't exist."
             try: 
                 current_rating = ratings[0].rating
             except :
@@ -144,7 +144,14 @@ class UserDetailView(generic.DetailView):
                 works = models.Work.objects.all().filter(user=user).order_by('-updated_at')
             except :
                 works = None
-            return render(request, template_name, {'user':user, 'current':False, 'current_rated':current_rating, 'works':works, 'form':form})
+
+            rater = models.User.objects.get(userid = request.session['user_id'])
+            if rater.canRate :
+                form = self.form_class(None)
+            else  : 
+                form = None    
+            
+            return render(request, template_name, {'user':user, 'current':False, 'current_rated':current_rating, 'works': works, 'form':form})
         
         else:
             # if not logged in redirect to url(/login)
@@ -155,8 +162,50 @@ class UserDetailView(generic.DetailView):
                 works = None
             return render(request, template_name, {'user':user, 'current':False, 'works':works})
     
-    def post(self, request):
-        pass
+    def post(self, request, **kwargs):
+        form = self.form_class(request.POST)
+
+        # print("-----------------------------------------------------")
+        # print (form)
+        if 'user_id' in request.session :
+
+            if form.is_valid() :
+                rnum = form.cleaned_data['rating']
+                rater = models.User.objects.get(userid = request.session['user_id'])
+                target = models.User.objects.get(userid = kwargs['uid'])
+                if kwargs['uid'] == None :
+                    return render( request, error_template , {'error': "UID wasn't passed in kwargs."} ) 
+                else :    
+                    # HAVE TO PUT EDIT LOGIC HERE OR OTHERWISE EVERYTIME A NEW RATING
+
+                    # robj = models.Rating(user1 = request.session['user_id'],
+                    #                     user2 = kwargs['uid'],
+                    #                     rating=rating, canEdit = True)
+                    f = True 
+                    try:
+                        ratings = models.Rating.objects.all().filter(user1=rater).filter(user2=target).order_by('-updated_at')
+                        robj = ratings[0]
+                        if (not robj.canEdit) :
+                            f = False
+                    except :
+                        f = False
+                    
+                    if f :
+                        robj.rating =  rnum
+                    else :
+                        robj = models.Rating(user1 = rater,
+                                            user2 = target,
+                                            rating=rnum, canEdit = True)
+                    robj.save()
+
+                return redirect(self.request.path_info)
+            else : 
+                print("-----------------------------------------------------")
+                print (form)
+                # print (request.session['user_id'])
+                return render( request, error_template , {'error': "Ratings form wan't valid."} ) 
+        else :
+            return render( request, error_template , {'error': "You have to be logged in to rate."} ) 
     # Get ratings for this user, rated by the session user
     # Edit the user details if the user id of the current view is the same as the session user
     # Edit the work details if the user id of the current view is the same as the session user
@@ -167,4 +216,8 @@ class UserDetailView(generic.DetailView):
             user = models.User.objects.get(userid=request.GET.get('user','None'))
             return (user.userid==request.session['user_id'])
         else:
-            return False  
+            return False 
+
+    # gets current rating of the user , shouldn't we make this a field ? 
+    def get_current_rating(self, request):
+        pass 
