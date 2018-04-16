@@ -35,3 +35,7 @@ body{
 .glyphicon-star.active {
     color: #FDB230;
 }
+
+.font-lora {
+    font-family: 'Lora', serif;
+}
