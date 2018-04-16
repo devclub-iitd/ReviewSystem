@@ -5,8 +5,10 @@ from django.views.generic import View
 from django.core.exceptions import ObjectDoesNotExist
 from . import models
 from . import forms
+import datetime
 
 error_template = 'ratings/error.html'
+TIME_LIMIT = 2*86400 
 
 # Create your views here.
 class IndexView(generic.ListView):
@@ -111,6 +113,51 @@ class UserUpdate(generic.UpdateView):
 class WorkUpdate(generic.UpdateView):
     model = models.Work
     fields = ['user','work']
+
+########################################## Do @ superuserloginrequired here ###################################
+class SudoView(View):
+    form_class = forms.SudoForm
+    template_name = 'ratings/sudo.html'
+    # Add user id to session variables
+    def get(self,request):
+        form = self.form_class(None)
+        return render(request, self.template_name, {'form':form, 'type':"Sudo"})
+
+    def post(self,request):
+        form = self.form_class(request.POST)
+
+        if form.is_valid() :
+            # form.save()
+            ecs = form.cleaned_data['EveryoneCanSee']
+            ecr = form.cleaned_data['EveryoneCanRate']
+            ece = form.cleaned_data['EveryoneCanEdit'] # this has to make ratings editable over a certain timeframe .
+            
+            userlist = models.User.objects.all()
+            for user in  userlist:
+                user.canSee  = ecs
+                user.canRate = ecr
+
+            ratings = models.Rating.objects.all()
+            tnow = datetime.datetime.now().timestamp()
+
+            for rating in ratings :
+                # find a better way than this because without
+                print ("----------------------------------------------------------")  
+                print ( abs ( rating.updated_at.timestamp() - tnow ) )
+                
+                # this probably won't work .
+                if abs ( rating.updated_at.timestamp() - tnow ) <= TIME_LIMIT : 
+                    rating.canEdit = ece
+
+            # iterate over all users and make the required fiels as such 
+
+            return redirect(self.request.path_info)
+        else : 
+            print("-----------------------------------------------------")
+            print (form)
+            return render(request, error_template, {'error': "Your Sudo form wasn't valid. Now you are redirected to Error Page."})
+
+
 
 class UserDetailView(generic.DetailView):
     form_class = forms.RatingForm
