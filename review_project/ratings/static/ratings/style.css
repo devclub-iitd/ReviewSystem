@@ -2,6 +2,22 @@ body{
     background: white url("images/background3.jpg");
 }
 
+.card, .padding-15{
+    padding: 15px;
+}
+
+.center-large, .center-small{
+    width: 60%;
+    padding: auto;
+}
+
+.center-small{
+    margin: 100px auto;    
+}
+
+.center-large{
+    margin: 20px auto;    
+}
 
 .navbar {
     border-radius: 0;

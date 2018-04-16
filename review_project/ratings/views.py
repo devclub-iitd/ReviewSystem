@@ -6,7 +6,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from . import models
 from . import forms
 
-
 error_template = 'ratings/error.html'
 
 # Create your views here.
@@ -26,9 +25,9 @@ class IndexView(generic.ListView):
         else:
             return redirect('ratings:login')
 
-class UserListView(generic.ListView):
+class LeaderBoardView(generic.ListView):
     model = models.User
-    context_object_name = 'user_list'
+    context_object_name = 'leaderboard'
 
 class LoginView(View):
     form_class = forms.LoginForm
@@ -39,7 +38,7 @@ class LoginView(View):
         print("-----------------------------------------------------")
         print (form) # this turned out to be null
         
-        return render(request, self.template_name, {'form':form})
+        return render(request, self.template_name, {'form':form,"type":"Login"})
 
     def post(self,request):
         form = self.form_class(request.POST)
@@ -83,14 +82,13 @@ class LogoutView(View):
             pass
         return redirect('ratings:login')
 
-
 class RegisterView(View):
     form_class = forms.UserForm
-    template_name = 'ratings/register.html'
+    template_name = 'ratings/login.html'
     # Add user id to session variables
     def get(self,request):
         form = self.form_class(None)
-        return render(request, self.template_name, {'form':form})
+        return render(request, self.template_name, {'form':form,'type':"Register"})
 
     def post(self,request):
         form = self.form_class(request.POST)
@@ -106,7 +104,6 @@ class RegisterView(View):
         else :
             return redirect('ratings:register')
 
-
 class UserUpdate(generic.UpdateView):
     model = models.User
     fields = ['name','about','updated_at']
@@ -114,9 +111,6 @@ class UserUpdate(generic.UpdateView):
 class WorkUpdate(generic.UpdateView):
     model = models.Work
     fields = ['user','work']
-
-# class UserList()
-
 
 class UserDetailView(generic.DetailView):
     form_class = forms.RatingForm

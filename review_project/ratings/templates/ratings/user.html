@@ -7,41 +7,39 @@
 {% endblock %}
 
 {% block body %}
-<div class="container-fluid songs-container">
-    <div class="row">
-        Userid: {{ user.userid }}
-    </div>
-    <div class="row">
-        Username: {{ user.name }}
-    </div>
-    <div class="row">
-        About: {{ user.about }}
-    </div>
-    <div class="row">
-
-        Works:{{ works }}
-
-        {% for work in works %}
-            <div class="col-sm-10">{{ work }}</div>
-        {% endfor %}
-
-    </div>
-
-    <div class="row">
-        Current Rated: {{ current_rated }}
-    </div>
-    {% if form %}
-    <form  class="form-horizontal" action="" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {% include 'ratings/genericForm.html' %}
-            <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <button type="submit" class="btn btn-success">Submit</button>
-            </div>
+<div class="container center-large card">
+    <div class="padding-15">
+        <div class="row">
+            Userid: {{ user.userid }}
         </div>
-    </form>
-    {% endif %}
+        <div class="row">
+            Username: {{ user.name }}
+        </div>
+        <div class="row">
+            About: {{ user.about }}
+        </div>
+        <div class="row">
+            Works:{{ works }}
+            {% for work in works %}
+                <div class="col-sm-10">{{ work }}</div>
+            {% endfor %}
+        </div>
 
+        <div class="row">
+            Current Rated: {{ current_rated }}
+        </div>
+        {% if form %}
+        <form  class="form-horizontal" action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% include 'ratings/genericForm.html' %}
+                <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-success">Submit</button>
+                </div>
+            </div>
+        </form>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}
 
