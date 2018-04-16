@@ -158,7 +158,7 @@ class SudoView(View):
 
             return redirect(self.request.path_info)
         else : 
-            print (form)
+            # print (form)
             return render(request, error_template, {'error': "Your Sudo form wasn't valid. Now you are redirected to Error Page."})
 
 
@@ -168,9 +168,9 @@ class UserDetailView(generic.DetailView):
 
     def get(self, request,**kwargs):
         uid = kwargs['uid'] # target user
-        raterid = request.session['user_id']
 
         if 'user_id' in request.session:
+            raterid = request.session['user_id']
             try: 
                 user = models.User.objects.get(userid=uid)
             except ObjectDoesNotExist:

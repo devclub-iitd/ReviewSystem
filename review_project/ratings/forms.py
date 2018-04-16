@@ -13,6 +13,8 @@ class UserForm(forms.ModelForm):
 
 class RatingForm(forms.ModelForm):
     # if user1.canRate = 1 and edit if canEdit = 1
+    rating = forms.CharField(widget=forms.NumberInput(attrs={'class':'form-control'}))
+    
     class Meta:
         model = models.Rating
         # fields = ('user1', 'user2', 'rating')
