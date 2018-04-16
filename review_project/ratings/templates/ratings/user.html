@@ -28,6 +28,11 @@
         <div class="row">
             Current Rated: {{ current_rated }}
         </div>
+
+        {% if error_message %}
+                <p><strong>{{ error_message }}</strong></p>
+        {% endif %}
+        
         {% if form %}
         <form  class="form-horizontal" action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
