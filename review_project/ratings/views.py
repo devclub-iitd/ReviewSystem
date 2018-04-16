@@ -33,6 +33,7 @@ class IndexView(generic.ListView):
 class LeaderBoardView(generic.ListView):
     model = models.User
     context_object_name = 'leaderboard'
+    ordering = ['-current_rating']
 
 class LoginView(View):
     form_class = forms.LoginForm
@@ -179,6 +180,7 @@ class UserDetailView(generic.DetailView):
 
         if 'user_id' in request.session:
             raterid = request.session['user_id']
+            ratingFound = False
             try: 
                 user = models.User.objects.get(userid=uid)
             except ObjectDoesNotExist:
@@ -189,9 +191,11 @@ class UserDetailView(generic.DetailView):
             except ObjectDoesNotExist:
                 current_rating = "Not yet rated by you. Rating Object after these filters doesn't exist."
             try: 
-                current_rating = ratings[0].rating
+                current_rating = ratings[0]
+                ratingFound = True
             except :
-                current_rating = "Not yet rated by you."
+                # current_rating = {'rating':"Not yet rated and reviewed by you.",'review'}
+                current_rating = "Not yet reviewed by you."
             try : 
                 works = models.Work.objects.all().filter(user=user).order_by('-updated_at')
             except :
@@ -202,11 +206,10 @@ class UserDetailView(generic.DetailView):
                 form = self.form_class(None)
             else  : 
                 form = None    
-            if raterid == uid:
-                current = True
-            else:
-                current = False
-            return render(request, self.template_name, {'user':user, 'current':current, 'current_rated':current_rating, 'works': works, 'form':form})
+            
+            ratingFound = False if (uid == raterid) else ratingFound 
+
+            return render(request, self.template_name, {'user':user, 'current':False, 'current_rated':current_rating, 'works': works, 'form':form, 'ratingFound':ratingFound})
         
         else:
             # if not logged in redirect to url(/login)
@@ -225,6 +228,7 @@ class UserDetailView(generic.DetailView):
         if 'user_id' in request.session :
             if form.is_valid() :
                 rnum = form.cleaned_data['rating']
+                rev = form.cleaned_data['review']
                 rater = models.User.objects.get(userid = request.session['user_id'])
                 target = models.User.objects.get(userid = kwargs['uid'])
                 if kwargs['uid'] == None :
@@ -242,11 +246,12 @@ class UserDetailView(generic.DetailView):
                         f = False
                     
                     if f :
-                        robj.rating =  rnum
+                        robj.rating = rnum
+                        robj.review = rev
                     else :
                         robj = models.Rating(user1 = rater,
                                             user2 = target,
-                                            rating=rnum, canEdit = True)
+                                            rating=rnum,review=rev, canEdit = True)
                     robj.save()
 
                 return redirect(self.request.path_info)
