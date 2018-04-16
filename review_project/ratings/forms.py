@@ -34,9 +34,9 @@ class LoginForm(forms.Form):
 class SudoForm(forms.Form):
     CHOICES=[( True ,'Enable'), # Make strings if True and False naievly doesn't work
             (False,'Disable')]
-
-    EveryoneCanSee  = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
-    EveryoneCanRate = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
-    EveryoneCanEdit = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
+    
+    EveryoneCanSee  = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect(), label="Everyone Can See")
+    EveryoneCanRate = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect(), label="Everyone Can Rate")
+    EveryoneCanEdit = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect(), label="Everyone Can Edit")
     
    

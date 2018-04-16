@@ -39,3 +39,13 @@ body{
 .font-lora {
     font-family: 'Lora', serif;
 }
+
+.login-form ul {
+    list-style: none;
+    padding-top: 10px;
+}
+
+.login-form li {
+    display: inline;
+    margin: 20px;
+}
