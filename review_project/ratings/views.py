@@ -65,7 +65,7 @@ class LoginView(View):
                         request.session['user_id'] = form.cleaned_data['userid']
                         return redirect('ratings:index')
                     else :
-                        return render(request, self.template_name, {'error_message': "Password doesn't match"})
+                        return render(request, self.template_name, {'form': form ,'error_message': "Password doesn't match"})
                 else :
                     return render(request, self.template_name, {'form': form ,'error_message': "User doesn't exist."})
             except ObjectDoesNotExist : 
@@ -118,16 +118,19 @@ class WorkUpdate(generic.UpdateView):
     fields = ['user','work']
 
 ########################################## Do @ superuserloginrequired here ###################################
-# @user_passes_test(lambda u: u.is_superuser)
 class SudoView(View):
     form_class = forms.SudoForm
-    template_name = 'ratings/sudo.html'
+    template_name = 'ratings/login.html'
     # Add user id to session variables
 
+    @method_decorator(user_passes_test(lambda u: u.is_superuser,login_url='/login/'))
     def get(self,request):
         form = self.form_class(None)
+        print (request.user.username)
+        print (request.user.is_superuser)
         return render(request, self.template_name, {'form':form, 'type':"Sudo"})
 
+    @method_decorator(user_passes_test(lambda u: u.is_superuser,login_url='/login/'))
     def post(self,request):
         form = self.form_class(request.POST)
 
@@ -137,9 +140,10 @@ class SudoView(View):
             ecr = form.cleaned_data['EveryoneCanRate']
             ece = form.cleaned_data['EveryoneCanEdit'] # this has to make ratings editable over a certain timeframe .
             upd = form.cleaned_data['UpdateEveryone']
-            print("--------------------------------------------------------------")
-            print(ecs, ecr, ece)
-            print("--------------------------------------------------------------")
+#             print("--------------------------------------------------------------")
+#             print(ecs, ecr, ece)
+#             print("--------------------------------------------------------------")
+
             
             userlist = models.User.objects.all()
             for user in  userlist:
@@ -155,17 +159,13 @@ class SudoView(View):
 
             for rating in ratings :
                 # find a better way than this because without
-                print ("----------------------------------------------------------")  
                 print ( abs ( rating.created_at.timestamp() - tnow.timestamp() ) )
                 if abs ( rating.created_at.timestamp() - tnow.timestamp() ) <= TIME_LIMIT : 
                     rating.canEdit = ece
                     rating.save()
 
-            # iterate over all users and make the required fields as such 
-
             return redirect(self.request.path_info)
         else : 
-            print("-----------------------------------------------------")
             print (form)
             return render(request, error_template, {'error': "Your Sudo form wasn't valid. Now you are redirected to Error Page."})
 
