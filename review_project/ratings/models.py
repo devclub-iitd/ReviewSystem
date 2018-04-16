@@ -23,7 +23,7 @@ class User(models.Model):
         # gets current rating of the user , shouldn't we make this a field ? 
     def update_ratings(self):
         tnow = datetime.datetime.now()
-        rl = models.Rating.objects.all().filter(user2 = self.userid) # ratings to our user
+        rl = Rating.objects.all().filter(user2 = self.userid) # ratings to our user
         
         totalRatings = 0
         cum_rating = 0.0
@@ -34,12 +34,15 @@ class User(models.Model):
             cum_rating += r.rating
             totalRatings += 1 
 
-            if abs( r.created_at.timestamp - tnow.timestamp() ) <= TIME_BUFF :
+            if abs( r.created_at.timestamp() - tnow.timestamp() ) <= TIME_BUFF :
                 cur_rating += r.rating
                 recentRatings += 1
-        
-        self.current_rating   = (cur_rating / recentRatings)
-        self.cumulated_rating = (cum_rating / totalRatings )
+        try : # if Divide by zero because of no ratings ?
+            self.current_rating   = (int)(cur_rating / recentRatings)
+            self.cumulated_rating = (int)(cum_rating / totalRatings )
+        except : 
+            self.current_rating   = 0
+            self.cumulated_rating = 0
 
 
 class Rating(models.Model):

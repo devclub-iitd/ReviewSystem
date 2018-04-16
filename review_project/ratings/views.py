@@ -136,7 +136,7 @@ class SudoView(View):
             ecs = form.cleaned_data['EveryoneCanSee']
             ecr = form.cleaned_data['EveryoneCanRate']
             ece = form.cleaned_data['EveryoneCanEdit'] # this has to make ratings editable over a certain timeframe .
-            
+            upd = form.cleaned_data['UpdateEveryone']
             print("--------------------------------------------------------------")
             print(ecs, ecr, ece)
             print("--------------------------------------------------------------")
@@ -145,7 +145,10 @@ class SudoView(View):
             for user in  userlist:
                 user.canSee  = ecs
                 user.canRate = ecr
+                if upd :
+                    user.update_ratings()
                 user.save()
+
 
             ratings = models.Rating.objects.all()
             tnow = datetime.datetime.now()
