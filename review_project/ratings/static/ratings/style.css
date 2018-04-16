@@ -54,3 +54,9 @@ body{
     display: inline;
     margin: 20px;
 }
+
+.editable {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
