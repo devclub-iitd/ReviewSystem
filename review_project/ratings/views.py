@@ -202,8 +202,11 @@ class UserDetailView(generic.DetailView):
                 form = self.form_class(None)
             else  : 
                 form = None    
-            
-            return render(request, self.template_name, {'user':user, 'current':False, 'current_rated':current_rating, 'works': works, 'form':form})
+            if raterid == uid:
+                current = True
+            else:
+                current = False
+            return render(request, self.template_name, {'user':user, 'current':current, 'current_rated':current_rating, 'works': works, 'form':form})
         
         else:
             # if not logged in redirect to url(/login)
