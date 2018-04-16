@@ -7,7 +7,7 @@ body{
 }
 
 .center-large, .center-small{
-    width: 60%;
+    width: 50%;
     padding: auto;
 }
 
@@ -17,6 +17,11 @@ body{
 
 .center-large{
     margin: 20px auto;    
+}
+
+.right-large {
+    width: 50%;
+    padding: auto;
 }
 
 .navbar {

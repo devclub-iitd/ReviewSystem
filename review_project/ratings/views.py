@@ -167,7 +167,7 @@ class SudoView(View):
 
             return redirect(self.request.path_info)
         else : 
-            print (form)
+            # print (form)
             return render(request, error_template, {'error': "Your Sudo form wasn't valid. Now you are redirected to Error Page."})
 
 
