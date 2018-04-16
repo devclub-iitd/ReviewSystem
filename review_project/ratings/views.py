@@ -140,10 +140,6 @@ class SudoView(View):
             ecr = form.cleaned_data['EveryoneCanRate']
             ece = form.cleaned_data['EveryoneCanEdit'] # this has to make ratings editable over a certain timeframe .
             
-            print("--------------------------------------------------------------")
-            print(ecs, ecr, ece)
-            print("--------------------------------------------------------------")
-            
             userlist = models.User.objects.all()
             for user in  userlist:
                 user.canSee  = ecs
@@ -155,17 +151,13 @@ class SudoView(View):
 
             for rating in ratings :
                 # find a better way than this because without
-                print ("----------------------------------------------------------")  
                 print ( abs ( rating.created_at.timestamp() - tnow.timestamp() ) )
                 if abs ( rating.created_at.timestamp() - tnow.timestamp() ) <= TIME_LIMIT : 
                     rating.canEdit = ece
                     rating.save()
 
-            # iterate over all users and make the required fields as such 
-
             return redirect(self.request.path_info)
         else : 
-            print("-----------------------------------------------------")
             print (form)
             return render(request, error_template, {'error': "Your Sudo form wasn't valid. Now you are redirected to Error Page."})
 
