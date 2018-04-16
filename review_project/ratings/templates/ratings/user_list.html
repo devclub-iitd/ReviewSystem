@@ -5,7 +5,7 @@
     <h2>Leaderboard: (For now it's unordered, order them later by CRPA and SRPA .) </h2>
     <ul>
         {% for user in object_list %}
-            <li>  <strong>{{ user.userid }}</strong>  .  Recent Rating is: <strong>{{ user.current_rating }}</strong>   </li> 
+            <li> <a href="{{ user.get_absolute_url }}"> <strong>{{ user.userid }}</strong> </a>  .  Recent Rating is: <strong>{{ user.current_rating }}</strong>   </li> 
         {% endfor %}
     </ul>
 {% endblock %}

@@ -16,7 +16,7 @@ class RatingForm(forms.ModelForm):
     class Meta:
         model = models.Rating
         # fields = ('user1', 'user2', 'rating')
-        fields = ('rating', )
+        fields = ('rating', 'review' )
 
 class WorkForm(forms.ModelForm):
     class Meta:

@@ -29,11 +29,28 @@
                     <span class="font-lora">Recent Rating:</span> {{ user.current_rating }}
                 </div>
             </div>
-        <div class="row">
+        
+        {% if ratingFound %}
+            <p><strong>{{ error_message }}</strong></p>
+            <div class="row">
                 <div class="col-sm-12">
-                    <span class="font-lora">Current Rating by You:</span> {{ current_rated }}
+                    <span class="font-lora">Current Rating by You:</span> {{ current_rated.rating }}
                 </div>
             </div>
+            <div class="row">
+                    <div class="col-sm-12">
+                        <span class="font-lora">Current Review by You:</span> {{ current_rated.review }}
+                    </div>
+            </div>
+
+        {% else %}
+        <div class="row">
+                <div class="col-sm-12">
+                    <span class="font-lora">Either you are the same user or this rating doesn't exist.</span>
+                </div>
+        </div>
+        {% endif %}
+            
         <div class="row">
             <div class="col-sm-12">
                 <span class="font-lora">Works:</span>

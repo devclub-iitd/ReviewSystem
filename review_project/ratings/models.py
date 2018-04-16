@@ -43,13 +43,17 @@ class User(models.Model):
         except : 
             self.current_rating   = 0
             self.cumulated_rating = 0
+    
+    def get_absolute_url(self):
+        return ("/user/"+self.userid)
 
 
 class Rating(models.Model):
     user1  = models.ForeignKey(User,on_delete=models.CASCADE,related_name='user1')
     user2  = models.ForeignKey(User,on_delete=models.CASCADE,related_name='user2')
     rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
-    
+    review = models.CharField(max_length=1024)
+
     canEdit = models.BooleanField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
