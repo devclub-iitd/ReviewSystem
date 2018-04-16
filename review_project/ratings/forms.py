@@ -38,5 +38,5 @@ class SudoForm(forms.Form):
     EveryoneCanSee  = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
     EveryoneCanRate = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
     EveryoneCanEdit = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
-    
+    UpdateEveryone  = forms.BooleanField()
    
