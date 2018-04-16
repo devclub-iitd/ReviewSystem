@@ -139,12 +139,20 @@ class SudoView(View):
             ecs = form.cleaned_data['EveryoneCanSee']
             ecr = form.cleaned_data['EveryoneCanRate']
             ece = form.cleaned_data['EveryoneCanEdit'] # this has to make ratings editable over a certain timeframe .
+            upd = form.cleaned_data['UpdateEveryone']
+#             print("--------------------------------------------------------------")
+#             print(ecs, ecr, ece)
+#             print("--------------------------------------------------------------")
+
             
             userlist = models.User.objects.all()
             for user in  userlist:
                 user.canSee  = ecs
                 user.canRate = ecr
+                if upd :
+                    user.update_ratings()
                 user.save()
+
 
             ratings = models.Rating.objects.all()
             tnow = datetime.datetime.now()
@@ -176,7 +184,6 @@ class UserDetailView(generic.DetailView):
             except ObjectDoesNotExist:
                 return render(request, error_template ,{'error': "The User for primary key : "+ uid +" does not exist."})
 
-                # user = models.User.objects.get(userid=request.GET.get('user','None'))
             try:
                 ratings = models.Rating.objects.all().filter(user1=raterid).filter(user2=user).order_by('-updated_at')
             except ObjectDoesNotExist:

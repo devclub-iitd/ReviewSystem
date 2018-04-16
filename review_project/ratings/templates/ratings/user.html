@@ -26,7 +26,12 @@
         </div>
         <div class="row">
                 <div class="col-sm-12">
-                    <span class="font-lora">Rating:</span> {{ current_rated }}
+                    <span class="font-lora">Recent Rating:</span> {{ user.current_rating }}
+                </div>
+            </div>
+        <div class="row">
+                <div class="col-sm-12">
+                    <span class="font-lora">Current Rating by You:</span> {{ current_rated }}
                 </div>
             </div>
         <div class="row">
@@ -49,7 +54,7 @@
             {% csrf_token %}
             {% include 'ratings/genericForm.html' %}
                 <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
+<div class="col-sm-offset-2 col-sm-10">
                     <button type="submit" class="btn btn-success">Submit</button>
                 </div>
             </div>
@@ -58,4 +63,3 @@
     </div>
 </div>
 {% endblock %}
-
