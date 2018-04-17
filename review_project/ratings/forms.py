@@ -12,8 +12,8 @@ class ProfileForm(UserCreationForm):
 
 class RatingForm(forms.ModelForm):
     # if user1.canRate = 1 and edit if canEdit = 1
-    rating = forms.IntegerField(initial='rating',widget=forms.NumberInput(attrs={'class':'form-control adjust-size'}))
-    review = forms.CharField(initial='review',widget=forms.TextInput(attrs={'class':'form-control adjust-size'}))
+    rating = forms.IntegerField(widget=forms.NumberInput(attrs={'class':'form-control adjust-size'}))
+    review = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control adjust-size'}))
     
     class Meta:
         model = models.Rating
