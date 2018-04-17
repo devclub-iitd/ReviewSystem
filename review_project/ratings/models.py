@@ -69,5 +69,5 @@ class Work(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return (self.user.userid+"'s work.")
+        return self.work
     

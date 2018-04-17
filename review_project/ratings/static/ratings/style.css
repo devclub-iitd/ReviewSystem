@@ -1,13 +1,20 @@
 body{
     background: white url("images/background3.jpg");
+    box-sizing: border-box;
 }
 
 .card, .padding-15{
     padding: 15px;
 }
 
-.center-large, .center-small{
-    width: 60%;
+.center-large{
+    width: 75%;
+    padding: auto;
+}
+
+.center-small{
+    width: 60%; 
+    max-width: 800px;
     padding: auto;
 }
 
@@ -59,4 +66,20 @@ body{
     position: absolute;
     top: 5px;
     right: 5px;
+}
+
+.work-row {
+    overflow: auto;
+    white-space: nowrap;
+    flex-direction: row !important;    
+    padding: 5px;
+    margin: 10px 0px;
+}
+
+.work-card {
+    display: inline-block !important;
+    width: 25%;
+    min-width: 200px;
+    margin: 5px;
+    flex-direction: row !important;
 }
