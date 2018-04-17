@@ -7,67 +7,55 @@
     <title>{% block title %}Review System{% endblock %}</title>
     <!-- <link rel="shortcut icon" type="image/png" href="{%  static 'favicon.ico' %}"/> -->
 
-    <link rel="stylesheet" type="text/css" href="{% static 'ratings/css/bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Satisfy">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <!-- <link rel="stylesheet" type="text/css" href="{% static 'ratings/css/bootstrap.min.css' %}"> -->
+    <!-- <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Satisfy"> -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css?family=Lora|Slabo+27px" rel="stylesheet"> 
     <link rel="stylesheet" type="text/css" href="{% static 'ratings/style.css' %}"  >
-
-    <script src="{% static 'ratings/jquery-3.3.1.min.js' %}"></script>
-    <script src="{% static 'ratings/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'ratings/js/main.js' %}"></script>
+
+    <!-- <script src="{% static 'ratings/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'ratings/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'ratings/js/main.js' %}"></script> -->
 
 </head>
 
 <body>
-<nav class="navbar navbar-inverse">
-    <div class="container-fluid">
-
-    <!--logo-->
-    <div class="navbar-header" >
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#topNavBar">
-            {% block navbar_items %}
-            {% endblock %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="http://devclub.in">DevClub</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
         </button>
-        <a href="{% url 'ratings:index' %}" class="navbar-brand">HOME</a>
-     </div>
-
-        <!--Indivisual Items-->
-        <div class="collapse navbar-collapse" id="topNavBar">
-            <ul class="nav navbar-nav">
-                <li class="active">
-                    <a href="{% url 'ratings:login' %}">
-                    <span class="glyphicon glyphicon-cd" aria-hidden="true"></span>&nbsp; LOGIN
-                    </a>
+        
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home</a>
                 </li>
-                <li class="">
-                    <a href="{% url 'ratings:user_list' %}">
-                    <span class="glyphicon glyphicon-ratings" aria-hidden="true"></span>&nbsp; USER - LIST
-                    </a>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'ratings:leaderboard' %}">Leaderboard</a>
                 </li>
-
-                <form action="get" class="navbar-form navbar-left" role="search" action="#">
-                    <div class="form-group">
-                        <input type="text" class="form-control" name="q" value="">
-                    </div>
-                    <button type="submit" class="btn btn-default">Search</button>
-                </form>
-
-                <ul class="nav navbar-nav navbar-right">
-                    <!-- <li class="">
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>&nbsp; Add Album
-                        </a>
-                    </li> -->
-                    <li class="">
-                        <a href="#">
-                        <span class="glyphicon glyphicon-off" aria-hidden="true"></span>&nbsp; LOGOUT
-                    </a>
-                    </li>
-                </ul>
-
             </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'ratings:login' %}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'ratings:register' %}">Register</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'ratings:logout' %}">Logout</a>
+                </li>
+            </ul>
+            <!-- <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button> -->
+            </form>
         </div>
-
-    </div>
-</nav>
+    </nav>
 
 {% block body %}
 

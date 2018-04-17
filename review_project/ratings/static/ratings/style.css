@@ -1,7 +1,35 @@
 body{
     background: white url("images/background3.jpg");
+    box-sizing: border-box;
 }
 
+.card, .padding-15{
+    padding: 15px;
+}
+
+.center-large{
+    width: 75%;
+    padding: auto;
+}
+
+.center-small{
+    width: 60%; 
+    max-width: 800px;
+    padding: auto;
+}
+
+.center-small{
+    margin: 100px auto;    
+}
+
+.center-large{
+    margin: 20px auto;    
+}
+
+.right-large {
+    width: 60%;
+    padding: auto;
+}
 
 .navbar {
     border-radius: 0;
@@ -18,4 +46,40 @@ body{
 
 .glyphicon-star.active {
     color: #FDB230;
+}
+
+.font-lora {
+    font-family: 'Lora', serif;
+}
+
+.login-form ul {
+    list-style: none;
+    padding-top: 10px;
+}
+
+.login-form li {
+    display: inline;
+    margin: 20px;
+}
+
+.editable {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+.work-row {
+    overflow: auto;
+    white-space: nowrap;
+    flex-direction: row !important;    
+    padding: 5px;
+    margin: 10px 0px;
+}
+
+.work-card {
+    display: inline-block !important;
+    width: 25%;
+    min-width: 200px;
+    margin: 5px;
+    flex-direction: row !important;
 }

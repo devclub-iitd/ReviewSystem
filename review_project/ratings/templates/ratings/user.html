@@ -1,18 +1,113 @@
 {% extends 'ratings/base.html' %}
+{% load staticfiles %}
 {% block title %}User Details{% endblock %}
 
 {% block navbar_items %}
 <span class="icon-bar">Home</span>
 <span class="icon-bar">Users</span>
-<span class="icon-bar">{{ user.userid }}</span>
 {% endblock %}
 
 {% block body %}
-<div class="container-fluid songs-container">
-    <div class="row">
-            Hello: {{ user.profile.userid }}
-            Current: {{ current }}
+<div class="container center-large card">
+    {% if current %}
+        <a href="#" class="editable"><img src="{% static 'ratings/images/edit.png' %}" width="20" height="20"></a>
+    {% endif %}
+    <div class="padding-15 no-edit">
+        <div class="row">
+            <div class="col-sm-12 row">
+                <span class="font-lora col-sm-3">Username:</span> 
+                <div class="col-sm-9">{{ user.name }}</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 row">
+                <span class="font-lora col-sm-3">User Id:</span> 
+                <div class="col-sm-9">{{ user.userid }}</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 row">
+                <span class="font-lora col-sm-3">About:</span>
+                <div class="col-sm-9">{{ user.about }}</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 row">
+                <span class="font-lora col-sm-3">Current Rating:</span>
+                <div class="col-sm-9">{{ user.current_rating }}</div>
+            </div>
+        </div>
+        
+        {% if ratingFound %}
+            <div class="row">
+                <div class="col-sm-12">
+                    <span class="font-lora">Current Rating by You:</span> {{ current_rated.rating }}
+                </div>
+            </div>
+            <div class="row">
+                    <div class="col-sm-12">
+                        <span class="font-lora">Current Review by You:</span> {{ current_rated.review }}
+                    </div>
+            </div>
+        <!-- <div class="row">
+                <div class="col-sm-12">
+                    <span class="font-lora">Either you are the same user or this rating doesn't exist.</span>
+                </div>
+        </div> -->
+        {% endif %}
+            
+        <div class="row">
+            <div class="col-sm-12 row">
+                <span class="font-lora col-sm-3">Works:</span>
+                <div class="col-sm-9 ">
+                    <div class="card work-row">
+                        {% for work in works %}
+                            <div class=" card work-card">{{ work }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if error_message %}
+                <p><strong>{{ error_message }}</strong></p>
+        {% endif %}
+        
+        {% if form %}
+        <form  class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% include 'ratings/genericForm.html' %}
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-success">Submit</button>
+                </div>
+            </div>
+        </form>
+        {% endif %}
     </div>
+    {% if current %}
+    <div class="padding-15 edit-form">
+        {% if workform and updateform %}
+        <form  class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% include 'ratings/genericForm.html' with form=workform %}
+            <div class="form-group row">
+                <div class="col-sm-offset-2">
+                    <button type="submit" class="btn btn-success">Add work</button>
+                </div>
+            </div>
+        </form>
+        <form  class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% include 'ratings/genericForm.html' with form=updateform %}
+            <div class="form-group row">
+                <div class="col-sm-offset-2">
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
-
