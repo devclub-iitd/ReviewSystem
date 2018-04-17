@@ -21,23 +21,17 @@ class IndexView(generic.ListView):
     #if logged in, display the current user's details
     @method_decorator(login_required)
     def get(self, request):
-        # if request.session['user_id']:
-        if 'user_id' in request.session:
-            template_name = 'ratings/user.html'
-            userid = request.session['user_id']
-            try:
-                current_user = models.User.objects.get(userid=request.session['user_id'])        
-            except ObjectDoesNotExist:
-                return render(request, error_template ,{'error': "The User for user_id : "+request.session['user_id']+" DoesNotExist. "})
-
-            # return render(request, template_name, {'user':current_user , 'current':True})
-            return redirect('/user/'+userid)
-        #if not logged in redirect to url(/login)
-        else:
-            return redirect('ratings:login')
+        template_name = 'ratings/user.html'
+        user = request.user
+        try:
+            current_user = models.Profile.objects.get(userid=user.profile.userid)        
+        except ObjectDoesNotExist:
+            return render(request, error_template ,{'error': "The User for user_id : "+user.profile.userid+" DoesNotExist. "})
+        # return render(request, template_name, {'user':current_user , 'current':True})
+        return redirect('/user/'+user.profile.userid)
 
 class LeaderBoardView(generic.ListView):
-    model = models.User
+    model = models.Profile
     context_object_name = 'leaderboard'
     ordering = ['-current_rating']
 
@@ -46,22 +40,25 @@ class RegisterView(View):
     template_name = 'registration/login.html'
     def get(self,request):
         form_profile = self.form_class_profile(None)
-        return render(request, self.template_name, {'form':form_profile,"type":"Login"})
+        return render(request, self.template_name, {'form':form_profile,"type":"Register"})
 
     def post(self,request):
         print ("Received Post Request")
         form_profile = self.form_class_profile(request.POST)
 
         if form_profile.is_valid():
-            form_profile.save()
-            username = form_profile.cleaned_data.get('username')
+            user = form_profile.save()
+            user.refresh_from_db()  # load the profile instance created by the signal
+            user.profile.about = form_profile.cleaned_data.get('about')
+            user.save()
             raw_password = form_profile.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
+            user = authenticate(username=user.username, password=raw_password)
+            print (user.username)
             login(request, user)
             print ("Logged in")
             return redirect('ratings:index')
         else:
-            return render(request, self.template_name, {'userform':form_user,'profileform':form_profile})
+            return render(request, self.template_name, {'form':form_profile,"type":"Register"})
 
 # ---------------------------------Redundant Classes-------------------------------------
 # class LoginView(View):
@@ -208,14 +205,13 @@ class UserDetailView(generic.DetailView):
     form_class_update = forms.UserUpdateForm
     template_name = 'ratings/user.html'
 
-    @login_required()
     def get(self, request,**kwargs):
         uid = kwargs['uid'] # target user
-        if 'user_id' in request.session:
-            raterid = request.session['user_id']
+        if request.user :
+            raterid = request.user.profile.userid
             ratingFound = False
             try: 
-                user = models.User.objects.get(userid=uid)
+                user = models.Profile.objects.get(userid=uid)
             except ObjectDoesNotExist:
                 return render(request, error_template ,{'error': "The User for primary key : "+ uid +" does not exist."})
             try:
@@ -232,7 +228,7 @@ class UserDetailView(generic.DetailView):
             except :
                 works = None
 
-            rater = models.User.objects.get(userid = raterid)
+            rater = models.Profile.objects.get(userid = raterid)
             if rater.canRate :
                 form = self.form_class(None)
             else  : 
@@ -243,14 +239,15 @@ class UserDetailView(generic.DetailView):
             else :
                 form_work = None
                 form_update = None                
-            
+            full_name = request.user.first_name + " " + request.user.last_name
+            print (full_name)
             ratingFound = False if (uid == raterid) else ratingFound 
             current = True if (uid == raterid) else False
-            return render(request, self.template_name, {'user':user, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update})
+            return render(request, self.template_name, {'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update})
         
         else:
             # if not logged in redirect to url(/login)
-            user = models.User.objects.get(userid=uid)
+            user = models.Profile.objects.get(userid=uid)
             try : 
                 works = models.Work.objects.all().filter(user=user).order_by('-updated_at')
             except :
@@ -264,15 +261,15 @@ class UserDetailView(generic.DetailView):
         print(form)
         print(workform)
         print(updateform)
-        if 'user_id' in request.session :
+        if request.user :
             if form.is_valid() :
                 rnum = form.cleaned_data['rating']
                 rev = form.cleaned_data['review']
-                rater = models.User.objects.get(userid = request.session['user_id'])
-                target = models.User.objects.get(userid = kwargs['uid'])
+                rater = models.Profile.objects.get(userid = request.user.profile.userid)
+                target = models.Profile.objects.get(userid = kwargs['uid'])
                 if kwargs['uid'] == None :
                     return render( request, self.template_name , {'error_message': "No kwargs in post request.", 'form':form} ) 
-                elif kwargs['uid'] == request.session['user_id'] :
+                elif kwargs['uid'] == request.user.profile.userid :
                     return render( request, self.template_name , {'error_message': "You cannot rate yourself.", 'form':form} )
                 else :    
                     f = True 
@@ -295,13 +292,13 @@ class UserDetailView(generic.DetailView):
                 return redirect(self.request.path_info)
             elif workform.is_valid() :
                 work = workform.cleaned_data['work']
-                user = models.User.objects.get(userid = request.session['user_id'])                
+                user = models.Profile.objects.get(userid = request.user.profile.userid)                
                 new_work = models.Work(user = user, work = work)
                 new_work.save()                
                 return redirect(self.request.path_info)
             elif updateform.is_valid() :
                 about = updateform.cleaned_data['about']
-                user = models.User.objects.get(userid = request.session['user_id'])   
+                user = models.Profile.objects.get(userid = request.user.profile.userid)   
                 user.about = about
                 user.save()                
                 return redirect(self.request.path_info)
@@ -316,9 +313,9 @@ class UserDetailView(generic.DetailView):
 
     # Function to check if the user id of the current view is the same as the session user
     def is_same_user(self,request):
-        if 'user_id' in request.session:
+        if request.user:
             user = models.User.objects.get(userid=request.GET.get('user','None'))
-            return (user.userid==request.session['user_id'])
+            return (user.userid==request.user.profile.userid)
         else:
             return False 
 

@@ -15,8 +15,8 @@
     <div class="padding-15 no-edit">
         <div class="row">
             <div class="col-sm-12 row">
-                <span class="font-lora col-sm-3">Username:</span> 
-                <div class="col-sm-9">{{ user.name }}</div>
+                <span class="font-lora col-sm-3">User Name:</span> 
+                <div class="col-sm-9">{{ name }}</div>
             </div>
         </div>
         <div class="row">
@@ -40,13 +40,15 @@
         
         {% if ratingFound %}
             <div class="row">
-                <div class="col-sm-12">
-                    <span class="font-lora">Current Rating by You:</span> {{ current_rated.rating }}
+                <div class="col-sm-12 row">
+                    <span class="font-lora col-sm-3">Current Rating by You:</span> 
+                    <div class="col-sm-9">{{ current_rated.rating }}</div>                    
                 </div>
             </div>
             <div class="row">
-                    <div class="col-sm-12">
-                        <span class="font-lora">Current Review by You:</span> {{ current_rated.review }}
+                    <div class="col-sm-12 row">
+                        <span class="font-lora col-sm-3">Current Review by You:</span> 
+                        <div class="col-sm-9">{{ current_rated.review }}</div>
                     </div>
             </div>
         <!-- <div class="row">

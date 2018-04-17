@@ -4,9 +4,9 @@ from django.contrib.auth.forms import UserCreationForm
 from . import models
 
 class ProfileForm(UserCreationForm):
-    userid = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control'}))
-    name = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
+    # userid = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
+    # password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control'}))
+    # name = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
     about = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
     
     class Meta:
