@@ -57,6 +57,19 @@
         </div>
     </nav>
 
+    <div class="logged-user">
+        <div class="row">
+            <div class="col-sm-12 font-large">
+                {{ name }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <span class="font-lora">@</span>{{ user.userid }}
+            </div>
+        </div>
+    </div>
+
 {% block body %}
 
 {% endblock %}

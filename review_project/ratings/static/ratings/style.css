@@ -8,7 +8,7 @@ body{
 }
 
 .center-large{
-    width: 75%;
+    width: 70%;
     padding: auto;
 }
 
@@ -52,6 +52,10 @@ body{
     font-family: 'Lora', serif;
 }
 
+.font-large {
+    font-size: 28px;
+}
+
 .login-form ul {
     list-style: none;
     padding-top: 10px;
@@ -82,4 +86,11 @@ body{
     min-width: 200px;
     margin: 5px;
     flex-direction: row !important;
+}
+
+.logged-user {
+    padding: 15px;
+    position: absolute;
+    width: 15%;
+    overflow-wrap: normal
 }

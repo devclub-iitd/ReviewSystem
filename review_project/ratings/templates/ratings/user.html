@@ -11,9 +11,10 @@
 <div class="container center-large card">
     {% if current %}
         <a href="#" class="editable"><img src="{% static 'ratings/images/edit.png' %}" width="20" height="20"></a>
+        <a href="#" class="exit"><img src="{% static 'ratings/images/exit.png' %}" width="20" height="20"></a>
     {% endif %}
     <div class="padding-15 no-edit">
-        <div class="row">
+        <!-- <div class="row">
             <div class="col-sm-12 row">
                 <span class="font-lora col-sm-3">User Name:</span> 
                 <div class="col-sm-9">{{ name }}</div>
@@ -24,7 +25,7 @@
                 <span class="font-lora col-sm-3">User Id:</span> 
                 <div class="col-sm-9">{{ user.userid }}</div>
             </div>
-        </div>
+        </div> -->
         <div class="row">
             <div class="col-sm-12 row">
                 <span class="font-lora col-sm-3">About:</span>
@@ -76,9 +77,17 @@
         {% endif %}
         
         {% if form %}
-        <form  class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">
+        <form  class="form-horizontal" action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            {% include 'ratings/genericForm.html' %}
+            {% for field in form %}
+                <div class="form-group row">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <span class="text-danger small">{{ field.errors }}</span>
+                    </div>
+                    <label class="col-sm-3 col-form-label font-lora">{{ field.label_tag }}</label>
+                    <div class="col-sm-3">{{ field }}</div>
+                </div>
+            {% endfor %}
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <button type="submit" class="btn btn-success">Submit</button>

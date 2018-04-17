@@ -2,9 +2,17 @@ $(document).ready(function(){
     console.log("yay"); 
     $("input").addClass("form-control");
     $(".edit-form").hide();
+    $(".exit").hide();
     $(".editable").on("click",function(){
-        console.log("Into edit");
         $(".edit-form").show();
         $(".no-edit").hide();    
+        $(".exit").show();
+        $(".editable").hide();        
     });
+    $(".exit").on("click",function(){
+        $(".edit-form").hide();
+        $(".no-edit").show();    
+        $(".editable").show();
+        $(".exit").hide();
+    })
 });

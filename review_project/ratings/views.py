@@ -213,7 +213,7 @@ class UserDetailView(generic.DetailView):
             try: 
                 user = models.Profile.objects.get(userid=uid)
             except ObjectDoesNotExist:
-                return render(request, error_template ,{'error': "The User for primary key : "+ uid +" does not exist."})
+                return render(request, error_template ,{'error': "The User with User Id : "+ uid +" does not exist."})
             try:
                 ratings = models.Rating.objects.all().filter(user1=raterid).filter(user2=user).order_by('-updated_at')
             except ObjectDoesNotExist:

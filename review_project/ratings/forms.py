@@ -4,9 +4,6 @@ from django.contrib.auth.forms import UserCreationForm
 from . import models
 
 class ProfileForm(UserCreationForm):
-    # userid = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
-    # password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control'}))
-    # name = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
     about = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
     
     class Meta:
@@ -15,8 +12,8 @@ class ProfileForm(UserCreationForm):
 
 class RatingForm(forms.ModelForm):
     # if user1.canRate = 1 and edit if canEdit = 1
-    rating = forms.IntegerField(widget=forms.NumberInput(attrs={'class':'form-control'}))
-    review = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
+    rating = forms.IntegerField(initial='rating',widget=forms.NumberInput(attrs={'class':'form-control adjust-size'}))
+    review = forms.CharField(initial='review',widget=forms.TextInput(attrs={'class':'form-control adjust-size'}))
     
     class Meta:
         model = models.Rating
@@ -32,9 +29,6 @@ class WorkForm(forms.ModelForm):
 
 class UserUpdateForm(forms.Form):
     about = forms.CharField(initial='about',widget=forms.Textarea(attrs={'class':'form-control','rows':5,'cols':40}))
-    # def __init__(self, *args, **kwargs):
-    #     super(UserUpdateForm, self).__init__(*args, **kwargs)
-    #     self.fields['about'].widget = forms.TextInput(attrs={'placeholder': 'about'})
     
     class Meta:
         model = models.Profile
