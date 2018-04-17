@@ -9,8 +9,10 @@
 
 {% block body %}
 <div class="container center-large card">
-    <a href="#" class="editable"><img src="{% static 'ratings/images/edit.png' %}" width="20" height="20"></a>
-    <div class="padding-15">
+    {% if current %}
+        <a href="#" class="editable"><img src="{% static 'ratings/images/edit.png' %}" width="20" height="20"></a>
+    {% endif %}
+    <div class="padding-15 no-edit">
         <div class="row">
             <div class="col-sm-12 row">
                 <span class="font-lora col-sm-3">Username:</span> 
@@ -31,7 +33,7 @@
         </div>
         <div class="row">
             <div class="col-sm-12 row">
-                <span class="font-lora col-sm-3">Recent Rating:</span>
+                <span class="font-lora col-sm-3">Current Rating:</span>
                 <div class="col-sm-9">{{ user.current_rating }}</div>
             </div>
         </div>
@@ -47,13 +49,11 @@
                         <span class="font-lora">Current Review by You:</span> {{ current_rated.review }}
                     </div>
             </div>
-
-        {% else %}
-        <div class="row">
+        <!-- <div class="row">
                 <div class="col-sm-12">
                     <span class="font-lora">Either you are the same user or this rating doesn't exist.</span>
                 </div>
-        </div>
+        </div> -->
         {% endif %}
             
         <div class="row">
@@ -75,13 +75,37 @@
         <form  class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {% include 'ratings/genericForm.html' %}
-                <div class="form-group">
-<div class="col-sm-offset-2 col-sm-10">
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
                     <button type="submit" class="btn btn-success">Submit</button>
                 </div>
             </div>
         </form>
         {% endif %}
     </div>
+    {% if current %}
+    <div class="padding-15 edit-form">
+        {% if workform and updateform %}
+        <form  class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% include 'ratings/genericForm.html' with form=workform %}
+            <div class="form-group row">
+                <div class="col-sm-offset-2">
+                    <button type="submit" class="btn btn-success">Add work</button>
+                </div>
+            </div>
+        </form>
+        <form  class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% include 'ratings/genericForm.html' with form=updateform %}
+            <div class="form-group row">
+                <div class="col-sm-offset-2">
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

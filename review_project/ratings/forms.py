@@ -13,7 +13,8 @@ class UserForm(forms.ModelForm):
 
 class RatingForm(forms.ModelForm):
     # if user1.canRate = 1 and edit if canEdit = 1
-    rating = forms.CharField(widget=forms.NumberInput(attrs={'class':'form-control'}))
+    rating = forms.IntegerField(widget=forms.NumberInput(attrs={'class':'form-control'}))
+    review = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
     
     class Meta:
         model = models.Rating
@@ -21,18 +22,26 @@ class RatingForm(forms.ModelForm):
         fields = ('rating', 'review' )
 
 class WorkForm(forms.ModelForm):
+    work = forms.CharField(widget=forms.Textarea(attrs={'class':'form-control','rows':5,'cols':40}))
+    
     class Meta:
         model = models.Work
-        fields = ('user', 'work')
+        fields = ('work', )
+
+class UserUpdateForm(forms.Form):
+    about = forms.CharField(initial='about',widget=forms.Textarea(attrs={'class':'form-control','rows':5,'cols':40}))
+    # def __init__(self, *args, **kwargs):
+    #     super(UserUpdateForm, self).__init__(*args, **kwargs)
+    #     self.fields['about'].widget = forms.TextInput(attrs={'placeholder': 'about'})
+    
+    class Meta:
+        model = models.User
+        fields = ('about', )
 
 class LoginForm(forms.Form):
     userid = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control'}))
     
-    # class Meta:
-    #     model = models.User
-    #     fields = ('userid', 'password')
-
 class SudoForm(forms.Form):
     CHOICES=[( True ,'Enable'), # Make strings if True and False naievly doesn't work
             (False,'Disable')]
@@ -41,5 +50,3 @@ class SudoForm(forms.Form):
     EveryoneCanRate = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
     EveryoneCanEdit = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
     UpdateEveryone  = forms.BooleanField()
-
-   
