@@ -179,13 +179,17 @@ class UserDetailView(generic.DetailView):
         form = self.form_class(request.POST)
         workform = self.form_class_work(request.POST)
         updateform = self.form_class_update(request.POST)
+        # avoid insecure access through postman
+        try:
+            target = models.Profile.objects.get(userid = kwargs['uid'])
+            target_user = models.User.objects.get(username = kwargs['uid'])
+        except:
+            return render(request, error_template ,{'error': "Invalid Post Request."})
         if request.user :
             if form.is_valid() :
                 rnum = form.cleaned_data['rating']
                 rev = form.cleaned_data['review']
                 rater = models.Profile.objects.get(userid = request.user.profile.userid)
-                target = models.Profile.objects.get(userid = kwargs['uid'])
-                target_user = models.User.objects.get(username = kwargs['uid'])
                 full_name = target_user.first_name + " " + target_user.last_name           
                 if kwargs['uid'] == None :
                     return render( request, self.template_name , {'error_message': "Invalid User", 'form':form, 'user':target, 'name':full_name} ) 
@@ -224,9 +228,9 @@ class UserDetailView(generic.DetailView):
                 return redirect(self.request.path_info)
             else : 
                 # print (request.session['user_id'])
-                return render( request, self.template_name , {'error_message': "Ratings form wan't valid.", 'form':form, 'user':user, 'name':full_name} ) 
+                return render( request, self.template_name , {'error_message': "Ratings form wan't valid.", 'form':form, 'user':target_user, 'name':full_name} ) 
         else :
-            return render( request, login_template , {'error_message': "You have to be logged in to rate.", 'form':form, 'user':user, 'name':full_name} ) 
+            return render( request, login_template , {'error_message': "You have to be logged in to rate.", 'form':form, 'user':target_user, 'name':full_name} ) 
     # Get ratings for this user, rated by the session user
     # Edit the user details if the user id of the current view is the same as the session user
     # Edit the work details if the user id of the current view is the same as the session user
