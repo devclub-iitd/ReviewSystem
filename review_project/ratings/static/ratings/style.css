@@ -94,3 +94,7 @@ body{
     width: 15%;
     overflow-wrap: normal
 }
+
+.leader-row {
+    border-top: 2px solid #777777;
+}

@@ -2,16 +2,29 @@
 {% block title %}Leaderboard{% endblock %}
 
 {% block body %}
-<div class="container center-small card">
-    <h2 class="text-center">Leaderboard</h2>
-    <table>
-        <tr>
+<div class="container center-large card">
+    <h2 class="text-center">Leaderboard</h2><br><hr>
+    <table class="table">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col" class="col-sm-3">User Id</th>
+                <th scope="col" class="col-sm-2">Rating</th>
+                <th scope="col" class="col-sm-7">Latest Work</th>
+            </tr>
+        </thead>
+        <tbody>
             {% for user in object_list %}
-                <td> <a href="{{ user.get_absolute_url }}"> <strong>{{ user.userid }}</strong></a></td>
-                <td> <strong>{{ user.current_rating }}</strong> </td>
-                <td> {{ user.get_latest_work }}</td> 
+            <tr>
+                <th scope="col"> <a href="{{ user.get_absolute_url }}"> 
+                    <strong>{{ user.userid }}</strong>
+                </a></th>
+                <td > <strong>{{ user.current_rating }}</strong> </td>
+                <td > {% if user.get_latest_work %} 
+                    {{ user.get_latest_work }}
+                    {% else %} {% endif %}</td> 
+            </tr>            
             {% endfor %}
-        </tr>
+        </tbody>
     </table>
 </div>
 {% endblock %}
