@@ -60,93 +60,6 @@ class RegisterView(View):
         else:
             return render(request, self.template_name, {'form':form_profile,"type":"Register"})
 
-# ---------------------------------Redundant Classes-------------------------------------
-# class LoginView(View):
-#     form_class = forms.LoginForm
-#     template_name = 'ratings/login.html'
-#     # Add user id to session variables
-#     def get(self,request):
-#         form = self.form_class(None)
-#         return render(request, self.template_name, {'form':form})
-        # print("-----------------------------------------------------")
-        # print (form) # this turned out to be null
-        # # print (form.cleaned_data)
-        # # print (form.cleaned_data['userid'])
-        # # print (form.cleaned_data['password'])
-
-        # if form.is_valid() :
-        #     # form.save()
-        #     uid = form.cleaned_data['userid']
-        #     paswd = form.cleaned_data['password']
-        #     try: 
-        #         uobj = models.User.objects.get(userid=uid)
-        #         if(uobj):
-        #             if(uobj.password == paswd) : 
-        #                 request.session['user_id'] = form.cleaned_data['userid']
-        #                 return redirect('ratings:index')
-        #             else :
-        #                 return render(request, self.template_name, {'form': form ,'error_message': "Password doesn't match","type":"Login"})
-        #         else :
-        #             return render(request, self.template_name, {'form': form ,'error_message': "User doesn't exist.","type":"Login"})
-        #     except ObjectDoesNotExist : 
-        #         return render(request, self.template_name, { 'form': form ,'error_message': "User ID doesn't exist.","type":"Login"})
-
-        #     return redirect('ratings:index')
-        # else : 
-        #     print("-----------------------------------------------------")
-        #     print (form)
-        #     # print (request.session['user_id'])
-        #     return redirect('ratings:login')
-
-# class LogoutView(View):
-#     def get(self, request):
-#         try: 
-#             if request.session['user_id']:
-#                 del request.session['user_id']
-#         except Exception:
-#             pass
-#         return redirect('ratings:login')
-
-# class RegisterView(View):
-#     form_class = forms.UserForm
-#     template_name = 'ratings/login.html'
-#     # Add user id to session variables
-#     def get(self,request):
-#         form = self.form_class(None)
-#         return render(request, self.template_name, {'form':form,'type':"Register"})
-
-#     def post(self,request):
-#         form = self.form_class(request.POST)
-
-#         if form.is_valid() :
-#             # form.save()
-#             fd = form.cleaned_data
-#             uobj = models.User(name=fd['name'],userid=fd['userid'],about=fd['about'],
-#                                 password=fd['password'],canSee=False,canRate=True)
-#             uobj.save()
-#             request.session['user_id'] = fd['userid']
-#             return redirect('ratings:index')
-#         else :
-#             return redirect('ratings:register')
-
-#     def post(self,request):
-#         username = request.POST['username']
-#         password = request.POST['password']
-#         print (username)
-#         print (password)
-#         user = User.objects.filter(username=request.POST['username'],password=request.POST['password'])
-#         if (user is not None):
-#             login(request,user)
-#             return redirect('ratings:index')
-#         else:
-#             print ("User is not found")
-#             return redirect('ratings:login')
-
-# class LogoutView(View):
-#     def get(self, request):
-#         logout(request)
-#         return redirect('ratings:user_list')
-
 class UserUpdate(generic.UpdateView):
     model = models.Profile
     fields = ['name','about','updated_at','work']
@@ -154,7 +67,7 @@ class UserUpdate(generic.UpdateView):
 ########################################## Do @ superuserloginrequired here ###################################
 class SudoView(View):
     form_class = forms.SudoForm
-    template_name = 'ratings/login.html'
+    template_name = 'registration/login.html'
     # Add user id to session variables
 
     @method_decorator(user_passes_test(lambda u: u.is_superuser,login_url='/login/'))
@@ -175,7 +88,7 @@ class SudoView(View):
             ece = form.cleaned_data['EveryoneCanEdit'] # this has to make ratings editable over a certain timeframe .
             upd = form.cleaned_data['UpdateEveryone']
             
-            userlist = models.User.objects.all()
+            userlist = models.Profile.objects.all()
             for user in  userlist:
                 user.canSee  = ecs
                 user.canRate = ecr
@@ -323,3 +236,95 @@ class UserDetailView(generic.DetailView):
         else:
             return False 
 
+
+
+
+
+
+#  For Udit
+#  ---------------------------------Redundant Classes-------------------------------------
+# class LoginView(View):
+#     form_class = forms.LoginForm
+#     template_name = 'ratings/login.html'
+#     # Add user id to session variables
+#     def get(self,request):
+#         form = self.form_class(None)
+#         return render(request, self.template_name, {'form':form})
+# print("-----------------------------------------------------")
+# print (form) # this turned out to be null
+# # print (form.cleaned_data)
+# # print (form.cleaned_data['userid'])
+# # print (form.cleaned_data['password'])
+
+# if form.is_valid() :
+#     # form.save()
+#     uid = form.cleaned_data['userid']
+#     paswd = form.cleaned_data['password']
+#     try: 
+#         uobj = models.User.objects.get(userid=uid)
+#         if(uobj):
+#             if(uobj.password == paswd) : 
+#                 request.session['user_id'] = form.cleaned_data['userid']
+#                 return redirect('ratings:index')
+#             else :
+#                 return render(request, self.template_name, {'form': form ,'error_message': "Password doesn't match","type":"Login"})
+#         else :
+#             return render(request, self.template_name, {'form': form ,'error_message': "User doesn't exist.","type":"Login"})
+#     except ObjectDoesNotExist : 
+#         return render(request, self.template_name, { 'form': form ,'error_message': "User ID doesn't exist.","type":"Login"})
+
+#     return redirect('ratings:index')
+# else : 
+#     print("-----------------------------------------------------")
+#     print (form)
+#     # print (request.session['user_id'])
+#     return redirect('ratings:login')
+
+# class LogoutView(View):
+#     def get(self, request):
+#         try: 
+#             if request.session['user_id']:
+#                 del request.session['user_id']
+#         except Exception:
+#             pass
+#         return redirect('ratings:login')
+
+# class RegisterView(View):
+#     form_class = forms.UserForm
+#     template_name = 'ratings/login.html'
+#     # Add user id to session variables
+#     def get(self,request):
+#         form = self.form_class(None)
+#         return render(request, self.template_name, {'form':form,'type':"Register"})
+
+#     def post(self,request):
+#         form = self.form_class(request.POST)
+
+#         if form.is_valid() :
+#             # form.save()
+#             fd = form.cleaned_data
+#             uobj = models.User(name=fd['name'],userid=fd['userid'],about=fd['about'],
+#                                 password=fd['password'],canSee=False,canRate=True)
+#             uobj.save()
+#             request.session['user_id'] = fd['userid']
+#             return redirect('ratings:index')
+#         else :
+#             return redirect('ratings:register')
+
+#     def post(self,request):
+#         username = request.POST['username']
+#         password = request.POST['password']
+#         print (username)
+#         print (password)
+#         user = User.objects.filter(username=request.POST['username'],password=request.POST['password'])
+#         if (user is not None):
+#             login(request,user)
+#             return redirect('ratings:index')
+#         else:
+#             print ("User is not found")
+#             return redirect('ratings:login')
+
+# class LogoutView(View):
+#     def get(self, request):
+#         logout(request)
+#         return redirect('ratings:user_list')

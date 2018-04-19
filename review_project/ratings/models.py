@@ -21,7 +21,7 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.userid
-        # gets current rating of the user , shouldn't we make this a field ? 
+    
     def update_ratings(self):
         tnow = datetime.datetime.now()
         rl = Rating.objects.all().filter(user2 = self.userid) # ratings to our user
@@ -47,6 +47,10 @@ class Profile(models.Model):
     
     def get_absolute_url(self):
         return ("/user/"+self.userid)
+
+    # Under Construction
+    def get_latest_work(self):
+        works = models.Work.objects.filter(user=self)
 
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):

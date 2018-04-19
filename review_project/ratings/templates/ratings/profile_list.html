@@ -4,10 +4,14 @@
 {% block body %}
 <div class="container center-small card">
     <h2 class="text-center">Leaderboard</h2>
-    <ul>
-        {% for user in object_list %}
-            <li> <a href="{{ user.get_absolute_url }}"> <strong>{{ user.userid }}</strong></a>.  Recent Rating is: <strong>{{ user.current_rating }}</strong>   </li> 
-        {% endfor %}
-    </ul>
+    <table>
+        <tr>
+            {% for user in object_list %}
+                <td> <a href="{{ user.get_absolute_url }}"> <strong>{{ user.userid }}</strong></a></td>
+                <td> <strong>{{ user.current_rating }}</strong> </td>
+                <td> {{ user.get_latest_work }}</td> 
+            {% endfor %}
+        </tr>
+    </table>
 </div>
 {% endblock %}
