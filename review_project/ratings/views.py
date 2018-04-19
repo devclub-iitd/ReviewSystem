@@ -31,10 +31,19 @@ class IndexView(generic.ListView):
         # return render(request, template_name, {'user':current_user , 'current':True})
         return redirect('/user/'+user.profile.userid)
 
-class LeaderBoardView(generic.ListView):
-    model = models.Profile
-    context_object_name = 'leaderboard'
-    ordering = ['-current_rating']
+class LeaderBoardView(View):
+    template_name = 'ratings/profile_list.html'
+    
+    @method_decorator(login_required)
+    def get(self,request):
+        object_list = models.Profile.objects.all().order_by('-current_rating')
+        ratercansee = request.user.profile.canSee
+        return render(request, self.template_name, {'object_list':object_list,'ratercansee':ratercansee})
+
+    # def get_context_data(self, **kwargs):
+    #     ctx = super(LeaderBoardView, self).get_context_data(**kwargs)
+    #     ctx['ratercansee'] = self.get_object().date.strftime("%B")
+    #     return ctx
 
 class RegisterView(View):
     form_class_profile = forms.ProfileForm
