@@ -16,13 +16,15 @@
             {% for user in object_list %}
             <tr>
                 <th scope="col"> <a href="{{ user.get_absolute_url }}">
-                    {% if ratercansee %} 
                     <strong>{{ user.userid }}</strong>
-                    {% else %}
-                    <strong>You have not rated everyone yet. You cannot see the ratings.</strong>
-                    {% endif %}                    
                 </a></th>
-                <td > <strong>{{ user.current_rating }}</strong> </td>
+                <td >
+                        {% if ratercansee %} 
+                        <strong>{{ user.current_rating }}</strong> 
+                        {% else %}
+                        <strong>Rate everyone to see ratings.</strong>
+                        {% endif %}   
+                </td>
                 <td > {% if user.get_latest_work %} 
                     {{ user.get_latest_work }}
                     {% else %} {% endif %}</td> 
