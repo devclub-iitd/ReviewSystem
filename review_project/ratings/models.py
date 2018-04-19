@@ -48,9 +48,13 @@ class Profile(models.Model):
     def get_absolute_url(self):
         return ("/user/"+self.userid)
 
-    # Under Construction
     def get_latest_work(self):
-        works = models.Work.objects.filter(user=self)
+        works = Work.objects.filter(user=self).order_by('-updated_at')
+        try:
+            latest_work = works[0]
+            return latest_work.work
+        except:
+            return None
 
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
