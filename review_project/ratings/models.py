@@ -6,7 +6,6 @@ from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator 
 import datetime
 
-TIME_BUFF = 7 * 86400 
 
 class Profile(models.Model):
     userid = models.CharField(primary_key=True,unique=True,max_length=6,default='')
@@ -34,8 +33,12 @@ class Profile(models.Model):
         for r in rl :
             cum_rating += r.rating
             totalRatings += 1 
+            try:
+                tbuff = ((Control.objects.all().order_by('-updated_at'))[0]).TimeBufferForCalc
+            except:
+                tbuff = 7 * 86400
 
-            if abs( r.created_at.timestamp() - tnow.timestamp() ) <= TIME_BUFF :
+            if abs( r.created_at.timestamp() - tnow.timestamp() ) <= tbuff :
                 cur_rating += r.rating
                 recentRatings += 1
         try : # if Divide by zero because of no ratings ?
@@ -44,7 +47,13 @@ class Profile(models.Model):
         except : 
             self.current_rating   = 0
             self.cumulated_rating = 0
-    
+        
+        # person cannot rate themselves
+        if Rating.objects.all().filter(user1 = self.userid).count() < (User.objects.all().exclude(is_superuser=True).count() - 1 ):
+            self.canSee = False
+        else :
+            self.canSee = True
+
     def get_absolute_url(self):
         return ("/user/"+self.userid)
 
@@ -84,3 +93,40 @@ class Work(models.Model):
     def __str__(self):
         return self.work
     
+class Control(models.Model):
+    SessionNumber = models.IntegerField(default=0)
+    # CHOICES=[( True ,'Enable'), # Make strings if True and False naievly doesn't work
+    #         (False,'Disable')]
+
+    RegistrationEnabled = models.BooleanField(default=True)
+    EveryoneCanSee  = models.BooleanField(default=True)
+    EveryoneCanRate = models.BooleanField(default=True)
+    EveryoneCanEdit = models.BooleanField(default=True)
+    UpdateEveryone  = models.BooleanField(default=True)
+    TimeBufferForCalc = models.IntegerField(default=(7*86400))
+    TimeLimitForRatingEdits = models.IntegerField(default=(2*86400))
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def updateOthers(self):
+        userlist = Profile.objects.all()
+        for user in  userlist:
+            user.canSee  = self.EveryoneCanSee
+            user.canRate = self.EveryoneCanRate
+            if self.UpdateEveryone :
+                user.update_ratings()
+            user.save()
+
+        ratings = Rating.objects.all()
+        tnow = datetime.datetime.now()
+
+        for rating in ratings :
+            # find a better way than this because without
+            print ( abs ( rating.created_at.timestamp() - tnow.timestamp() ) )
+            if abs ( rating.created_at.timestamp() - tnow.timestamp() ) <= self.TimeLimitForRatingEdits : 
+                rating.canEdit = self.EveryoneCanEdit
+                rating.save()
+
+    def __str__(self):
+        return ("Session Number:" + self.number)

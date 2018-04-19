@@ -38,11 +38,8 @@ class LoginForm(forms.Form):
     userid = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control'}))
     
-class SudoForm(forms.Form):
-    CHOICES=[( True ,'Enable'), # Make strings if True and False naievly doesn't work
-            (False,'Disable')]
-
-    EveryoneCanSee  = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
-    EveryoneCanRate = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
-    EveryoneCanEdit = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
-    UpdateEveryone  = forms.BooleanField()
+class SudoForm(forms.ModelForm):
+    
+    class Meta:
+        model = models.Control
+        fields = ('SessionNumber', 'RegistrationEnabled' , 'EveryoneCanSee', 'EveryoneCanRate', 'EveryoneCanEdit', 'UpdateEveryone' )

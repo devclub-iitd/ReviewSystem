@@ -12,8 +12,9 @@ from . import forms
 import datetime
 
 error_template = 'ratings/error.html'
-login_template = 'ratings/login.html'
-TIME_LIMIT = 2*86400 
+login_template = 'registration/login.html'
+
+# SESSION_NUMBER = 0
 
 # Create your views here.
 # @login_required(login_url='/login/')
@@ -69,12 +70,15 @@ class SudoView(View):
     form_class = forms.SudoForm
     template_name = 'registration/login.html'
     # Add user id to session variables
-
     @method_decorator(user_passes_test(lambda u: u.is_superuser,login_url='/login/'))
     def get(self,request):
-        form = self.form_class(None)
-        print (request.user.username)
-        print (request.user.is_superuser)
+        try :
+            ctrl = (models.Control.objects.all().order_by('-updated_at'))[0]
+        except :
+            ctrl = models.Control()
+        
+        form = self.form_class(instance=ctrl)
+
         return render(request, self.template_name, {'form':form, 'type':"Sudo"})
 
     @method_decorator(user_passes_test(lambda u: u.is_superuser,login_url='/login/'))
@@ -82,34 +86,16 @@ class SudoView(View):
         form = self.form_class(request.POST)
 
         if form.is_valid() :
-            # form.save()
-            ecs = form.cleaned_data['EveryoneCanSee']
-            ecr = form.cleaned_data['EveryoneCanRate']
-            ece = form.cleaned_data['EveryoneCanEdit'] # this has to make ratings editable over a certain timeframe .
-            upd = form.cleaned_data['UpdateEveryone']
-            
-            userlist = models.Profile.objects.all()
-            for user in  userlist:
-                user.canSee  = ecs
-                user.canRate = ecr
-                if upd :
-                    user.update_ratings()
-                user.save()
-
-            ratings = models.Rating.objects.all()
-            tnow = datetime.datetime.now()
-
-            for rating in ratings :
-                # find a better way than this because without
-                print ( abs ( rating.created_at.timestamp() - tnow.timestamp() ) )
-                if abs ( rating.created_at.timestamp() - tnow.timestamp() ) <= TIME_LIMIT : 
-                    rating.canEdit = ece
-                    rating.save()
-
+            form.save()
+            # commit = False ?
+            ctrl = (models.Control.objects.all().order_by('-updated_at'))[0]
+            ctrl.updateOthers()
+            ctrl.save()
+            # idk why but just do it
             return redirect(self.request.path_info)
         else : 
             # print (form)
-            return render(request, error_template, {'error': "Your Sudo form wasn't valid. Now you are redirected to Error Page."})
+            return render(request, self.template_name, {'form':form, 'type':"Sudo", 'error_message': "Your Sudo form wasn't valid."})
 
 
 class UserDetailView(generic.DetailView):
@@ -157,7 +143,8 @@ class UserDetailView(generic.DetailView):
             print (full_name)
             ratingFound = False if (uid == raterid) else ratingFound 
             current = True if (uid == raterid) else False
-            return render(request, self.template_name, {'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update})
+            
+            return render(request, self.template_name, {'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'rater':rater})
         
         else:
             try :
