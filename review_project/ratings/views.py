@@ -148,16 +148,24 @@ class UserDetailView(generic.DetailView):
                 form = self.form_class(None)
             else  : 
                 form = None
+            # Get User Update Forms
             if raterid == uid :
                 form_work = self.form_class_work(None)
                 form_update = self.form_class_update(initial={'about':rater.about})
             else :
                 form_work = None
-                form_update = None                
-            print (full_name)
+                form_update = None           
+            
             ratingFound = False if (uid == raterid) else ratingFound 
             current = True if (uid == raterid) else False
-            return render(request, self.template_name, {'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update})
+            user_ratings = []
+            if(current):
+                curr_ratings = models.Rating.objects.filter(user2=rater).order_by('-updated_at')
+                for rating in curr_ratings:
+                    user_ratings.append({'rating':rating.rating,'review':rating.review})
+                print (user_ratings)
+
+            return render(request, self.template_name, {'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'rating_list':user_ratings})
         
         else:
             try :
