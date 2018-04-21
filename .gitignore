@@ -1,6 +1,6 @@
 venv/
 db.sqlite3
-*/migrations/
+migrations/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
