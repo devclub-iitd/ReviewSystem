@@ -25,7 +25,7 @@ class IndexView(generic.ListView):
         template_name = 'ratings/user.html'
         user = request.user
         try:
-            current_user = models.Profile.objects.get(userid=user.profile.userid)        
+            current_user = models.Profile.objects.get(userid=user.profile.userid)
         except ObjectDoesNotExist:
             return render(request, error_template ,{'error': "The User for user_id : "+user.profile.userid+" DoesNotExist. "})
         # return render(request, template_name, {'user':current_user , 'current':True})
@@ -33,7 +33,7 @@ class IndexView(generic.ListView):
 
 class LeaderBoardView(View):
     template_name = 'ratings/profile_list.html'
-    
+
     @method_decorator(login_required)
     def get(self,request):
         object_list = models.Profile.objects.all().order_by('-current_rating')
@@ -85,7 +85,7 @@ class SudoView(View):
             ctrl = (models.Control.objects.all().order_by('-updated_at'))[0]
         except :
             ctrl = models.Control()
-        
+
         form = self.form_class(instance=ctrl)
 
         return render(request, self.template_name, {'form':form, 'type':"Sudo"})
@@ -102,7 +102,7 @@ class SudoView(View):
             ctrl.save()
             # idk why but just do it
             return redirect(self.request.path_info)
-        else : 
+        else :
             # print (form)
             return render(request, self.template_name, {'form':form, 'type':"Sudo", 'error_message': "Your Sudo form wasn't valid."})
 
@@ -118,22 +118,22 @@ class UserDetailView(generic.DetailView):
         if request.user :
             raterid = request.user.profile.userid
             ratingFound = False
-            try: 
+            try:
                 user = models.Profile.objects.get(userid=uid)
                 target_user = models.User.objects.get(username=uid)
-                full_name = target_user.first_name + " " + target_user.last_name           
+                full_name = target_user.first_name + " " + target_user.last_name
             except ObjectDoesNotExist:
                 return render(request, error_template ,{'error': "The User with User Id : "+ uid +" does not exist."})
             try:
                 ratings = models.Rating.objects.all().filter(user1=raterid).filter(user2=user).order_by('-updated_at')
             except ObjectDoesNotExist:
                 current_rating = "Not yet rated by you. Rating Object after these filters doesn't exist."
-            try: 
+            try:
                 current_rating = ratings[0]
                 ratingFound = True
             except :
                 current_rating = "Not yet reviewed by you."
-            try : 
+            try :
                 works = models.Work.objects.all().filter(user=user).order_by('-updated_at')
             except :
                 works = None
@@ -141,7 +141,7 @@ class UserDetailView(generic.DetailView):
             rater = models.Profile.objects.get(userid = raterid)
             if rater.canRate :
                 form = self.form_class(None)
-            else  : 
+            else  :
                 form = None
             # Get User Update Forms
             if raterid == uid :
@@ -149,9 +149,9 @@ class UserDetailView(generic.DetailView):
                 form_update = self.form_class_update(initial={'about':rater.about})
             else :
                 form_work = None
-                form_update = None           
-            
-            ratingFound = False if (uid == raterid) else ratingFound 
+                form_update = None
+
+            ratingFound = False if (uid == raterid) else ratingFound
             current = True if (uid == raterid) else False
             user_ratings = []
             if(current):
@@ -161,20 +161,20 @@ class UserDetailView(generic.DetailView):
                 print (user_ratings)
 
             return render(request, self.template_name, {'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'rating_list':user_ratings, 'rater':rater})
-        
+
         else:
             try :
-                user = models.Profile.objects.get(userid=uid)        
+                user = models.Profile.objects.get(userid=uid)
                 target_user = models.User.objects.get(username=uid)
                 full_name = target_user.first_name + " " + target_user.last_name
             except ObjectDoesNotExist :
-                return render(request, error_template ,{'error': "The User with User Id : "+ uid +" does not exist."})                
-            try : 
+                return render(request, error_template ,{'error': "The User with User Id : "+ uid +" does not exist."})
+            try :
                 works = models.Work.objects.all().filter(user=user).order_by('-updated_at')
             except :
                 works = None
             return render(request, self.template_name, {'user':user, 'name':full_name, 'current':False, 'works':works})
-    
+
     def post(self, request, **kwargs):
         form = self.form_class(request.POST)
         workform = self.form_class_work(request.POST)
@@ -183,7 +183,7 @@ class UserDetailView(generic.DetailView):
         try:
             target = models.Profile.objects.get(userid = kwargs['uid'])
             target_user = models.User.objects.get(username = kwargs['uid'])
-            full_name = target_user.first_name + " " + target_user.last_name            
+            full_name = target_user.first_name + " " + target_user.last_name
         except:
             return render(request, error_template ,{'error': "Invalid Post Request."})
         if request.user :
@@ -191,13 +191,13 @@ class UserDetailView(generic.DetailView):
                 rnum = form.cleaned_data['rating']
                 rev = form.cleaned_data['review']
                 rater = models.Profile.objects.get(userid = request.user.profile.userid)
-                full_name = target_user.first_name + " " + target_user.last_name           
+                full_name = target_user.first_name + " " + target_user.last_name
                 if kwargs['uid'] == None :
-                    return render( request, self.template_name , {'error_message': "Invalid User", 'form':form, 'user':target, 'name':full_name} ) 
+                    return render( request, self.template_name , {'error_message': "Invalid User", 'form':form, 'user':target, 'name':full_name} )
                 elif kwargs['uid'] == request.user.profile.userid :
                     return render( request, self.template_name , {'error_message': "You cannot rate yourself.", 'form':form, 'user':target, 'name':full_name} )
-                else :    
-                    f = True 
+                else :
+                    f = True
                     try:
                         ratings = models.Rating.objects.all().filter(user1=rater).filter(user2=target).order_by('-updated_at')
                         robj = ratings[0]
@@ -205,7 +205,7 @@ class UserDetailView(generic.DetailView):
                             f = False
                     except :
                         f = False
-                        
+
                     if f :
                         robj.rating = rnum
                         robj.review = rev
@@ -216,22 +216,36 @@ class UserDetailView(generic.DetailView):
                     robj.save()
                 return redirect(self.request.path_info)
             elif workform.is_valid() :
+                #work = workform.cleaned_data['work']
+                #user = models.Profile.objects.get(userid = request.user.profile.userid)
+                #new_work = models.Work(user = user, work = work)
+                #new_work.save()
+                #return redirect(self.request.path_info)
+
+                onlychoices=request.POST.getlist('working[]')
                 work = workform.cleaned_data['work']
-                user = models.Profile.objects.get(userid = request.user.profile.userid)                
-                new_work = models.Work(user = user, work = work)
-                new_work.save()                
+                user = models.Profile.objects.get(userid = request.user.profile.userid)
+                worklist=models.Work.objects.all().filter(user=user)
+                if work:
+                    new_work = models.Work(user = user, work = work)
+                    new_work.save()
+                if onlychoices:
+                    for each_delete in onlychoices:
+                            r=models.Work.objects.filter(user=user,work=each_delete)
+                            r[0].delete()
+
                 return redirect(self.request.path_info)
             elif updateform.is_valid() :
                 about = updateform.cleaned_data['about']
-                user = models.Profile.objects.get(userid = request.user.profile.userid)   
+                user = models.Profile.objects.get(userid = request.user.profile.userid)
                 user.about = about
-                user.save()                
+                user.save()
                 return redirect(self.request.path_info)
-            else : 
+            else :
                 # print (request.session['user_id'])
-                return render( request, self.template_name , {'error_message': "Ratings form wan't valid.", 'form':form, 'user':target_user, 'name':full_name} ) 
+                return render( request, self.template_name , {'error_message': "Ratings form wan't valid.", 'form':form, 'user':target_user, 'name':full_name} )
         else :
-            return render( request, login_template , {'error_message': "You have to be logged in to rate.", 'form':form, 'user':target_user, 'name':full_name} ) 
+            return render( request, login_template , {'error_message': "You have to be logged in to rate.", 'form':form, 'user':target_user, 'name':full_name} )
     # Get ratings for this user, rated by the session user
     # Edit the user details if the user id of the current view is the same as the session user
     # Edit the work details if the user id of the current view is the same as the session user
@@ -242,7 +256,7 @@ class UserDetailView(generic.DetailView):
             user = models.User.objects.get(userid=request.GET.get('user','None'))
             return (user.userid==request.user.profile.userid)
         else:
-            return False 
+            return False
 
 
 
@@ -268,21 +282,21 @@ class UserDetailView(generic.DetailView):
 #     # form.save()
 #     uid = form.cleaned_data['userid']
 #     paswd = form.cleaned_data['password']
-#     try: 
+#     try:
 #         uobj = models.User.objects.get(userid=uid)
 #         if(uobj):
-#             if(uobj.password == paswd) : 
+#             if(uobj.password == paswd) :
 #                 request.session['user_id'] = form.cleaned_data['userid']
 #                 return redirect('ratings:index')
 #             else :
 #                 return render(request, self.template_name, {'form': form ,'error_message': "Password doesn't match","type":"Login"})
 #         else :
 #             return render(request, self.template_name, {'form': form ,'error_message': "User doesn't exist.","type":"Login"})
-#     except ObjectDoesNotExist : 
+#     except ObjectDoesNotExist :
 #         return render(request, self.template_name, { 'form': form ,'error_message': "User ID doesn't exist.","type":"Login"})
 
 #     return redirect('ratings:index')
-# else : 
+# else :
 #     print("-----------------------------------------------------")
 #     print (form)
 #     # print (request.session['user_id'])
@@ -290,7 +304,7 @@ class UserDetailView(generic.DetailView):
 
 # class LogoutView(View):
 #     def get(self, request):
-#         try: 
+#         try:
 #             if request.session['user_id']:
 #                 del request.session['user_id']
 #         except Exception:
