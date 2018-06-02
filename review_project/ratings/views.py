@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from . import models
 from . import forms
 import datetime
+from django.core import signing
+
 
 error_template = 'ratings/error.html'
 login_template = 'registration/login.html'
@@ -114,6 +116,19 @@ class UserDetailView(generic.DetailView):
     template_name = 'ratings/user.html'
 
     def get(self, request,**kwargs):
+
+        def decrypt(encryptedqueryset,string='work'):
+            dictionary=encryptedqueryset.values(string)
+            trueworks=[]
+            for i in dictionary:
+                m=i.get(string)
+                trueworks.append(m)
+            decryptworks=[]
+            for i in trueworks:
+                n=signing.loads(i)
+                decryptworks.append(n[0])
+            return decryptworks
+
         uid = kwargs['uid'] # target user
         if request.user :
             raterid = request.user.profile.userid
@@ -134,7 +149,18 @@ class UserDetailView(generic.DetailView):
             except :
                 current_rating = "Not yet reviewed by you."
             try :
-                works = models.Work.objects.all().filter(user=user).order_by('-updated_at')
+                works = models.Work.objects.all().filter(user=user).order_by('-updated_at')#.values('work')
+                works=decrypt(works)
+                #trueworks=[]
+                #for i in works:
+                #    m=i.get('work')
+                #    trueworks.append(m)
+                #works=trueworks
+                #decryptworks=[]
+                #for i in works:
+                #    n=signing.loads(i)
+                #    decryptworks.append(n[0])
+                #works=decryptworks
             except :
                 works = None
 
@@ -160,7 +186,7 @@ class UserDetailView(generic.DetailView):
                     user_ratings.append({'rating':rating.rating,'review':rating.review})
                 print (user_ratings)
 
-            return render(request, self.template_name, {'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'rating_list':user_ratings, 'rater':rater})
+            return render(request, self.template_name, {'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'rating_list':user_ratings, 'rater':rater})#,'decryptworks':decryptworks})
 
         else:
             try :
@@ -170,10 +196,22 @@ class UserDetailView(generic.DetailView):
             except ObjectDoesNotExist :
                 return render(request, error_template ,{'error': "The User with User Id : "+ uid +" does not exist."})
             try :
-                works = models.Work.objects.all().filter(user=user).order_by('-updated_at')
+                works = models.Work.objects.all().filter(user=user).order_by('-updated_at')#.values('work')
+
+                #trueworks=[]
+                #for i in works:
+                #    m=i.get('work')
+                #    trueworks.append(m)
+                #works=trueworks
+                #decryptworks=[]
+                #for i in works:
+                #    n=signing.loads(i)
+                #    decryptworks.append(n[0])
+                works=decrypt(works)
+
             except :
                 works = None
-            return render(request, self.template_name, {'user':user, 'name':full_name, 'current':False, 'works':works})
+            return render(request, self.template_name, {'user':user, 'name':full_name, 'current':False, 'works':works})#,'decryptworks':decryptworks})
 
     def post(self, request, **kwargs):
         form = self.form_class(request.POST)
@@ -216,24 +254,30 @@ class UserDetailView(generic.DetailView):
                     robj.save()
                 return redirect(self.request.path_info)
             elif workform.is_valid() :
-                #work = workform.cleaned_data['work']
-                #user = models.Profile.objects.get(userid = request.user.profile.userid)
-                #new_work = models.Work(user = user, work = work)
-                #new_work.save()
-                #return redirect(self.request.path_info)
-
-                onlychoices=request.POST.getlist('working[]')
+                onlychoices=request.POST.getlist('working[]') # Returns list of selected checkbox(decrypted)
                 work = workform.cleaned_data['work']
+                tupwork= (work,)
+                cryptotuple=signing.dumps(tupwork)
+                #decryptotuple=signing.loads(cryptotuple)
                 user = models.Profile.objects.get(userid = request.user.profile.userid)
-                worklist=models.Work.objects.all().filter(user=user)
+
                 if work:
-                    new_work = models.Work(user = user, work = work)
+                    new_work = models.Work(user = user, work = cryptotuple)
                     new_work.save()
                 if onlychoices:
                     for each_delete in onlychoices:
-                            r=models.Work.objects.filter(user=user,work=each_delete)
-                            r[0].delete()
-
+                            r=models.Work.objects.filter(user=user)
+                            works=r.values('work')
+                            trueworks=[]
+                            for i in works:
+                                m=i.get('work')
+                                trueworks.append(m)
+                            works=trueworks
+                            for i in range(len(works)):
+                                n=signing.loads(works[i])
+                                if each_delete==n[0]:
+                                    r[i].delete()
+                                    break
                 return redirect(self.request.path_info)
             elif updateform.is_valid() :
                 about = updateform.cleaned_data['about']

@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core import signing
 import datetime
 
 
@@ -58,10 +59,16 @@ class Profile(models.Model):
         return ("/user/"+self.userid)
 
     def get_latest_work(self):
-        works = Work.objects.filter(user=self).order_by('-updated_at')
+        works = Work.objects.filter(user=self).order_by('-updated_at').values('work')
+        trueworks=[]
+        for i in works:
+            m=i.get('work')
+            trueworks.append(m)
+        works=trueworks
         try:
             latest_work = works[0]
-            return latest_work.work
+            decrypted_work=signing.loads(latest_work)
+            return decrypted_work[0]
         except:
             return None
 

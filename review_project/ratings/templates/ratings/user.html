@@ -127,6 +127,16 @@
     {% if current %}
     <div class="padding-15 edit-form">
         {% if workform and updateform %}
+        <div class="row">
+            <div class="col-sm-12 row">
+                <span class="font-lora col-sm-3">Works:</span>
+                <div class="col-sm-9 ">
+                        {% for work in works %}
+                            <div class="card work-card">{{ work }}</div>
+                        {% endfor %}
+                </div>
+            </div>
+        </div>
         <form  class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {% include 'ratings/genericForm.html' with form=workform %}   <!---This is for the add work part--->
@@ -135,10 +145,9 @@
             {%for each in works%}
             <input type="checkbox" name="working[]" value='{{each}}'>{{each}}
             {%endfor%}
-
             <div class="form-group row">
                 <div class="col-sm-offset-2">
-                  <button type="submit" class="btn btn-success">Update  </button>
+                  <button type="submit" class="btn btn-success">Update </button>
                 </div>
             </div>
         </form>
