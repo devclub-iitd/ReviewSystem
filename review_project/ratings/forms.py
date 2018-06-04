@@ -1,8 +1,9 @@
 from django import forms
-from django.forms import Textarea
+from django.forms import Textarea,RadioSelect
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from . import models
+from django.core import signing
 
 class ProfileForm(UserCreationForm):
     about = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
@@ -13,13 +14,24 @@ class ProfileForm(UserCreationForm):
 
 class RatingForm(forms.ModelForm):
     # if user1.canRate = 1 and edit if canEdit = 1
-    rating = forms.IntegerField(widget=forms.NumberInput(attrs={'class':'form-control adjust-size'}))
-    review = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control adjust-size'}))
+    #rating = forms.IntegerField(widget=forms.NumberInput(attrs={'class':'form-control adjust-size'}))
+    #review = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control adjust-size'}))
 
     class Meta:
+        choices=[]
+        for i in range(1,11):
+            en=signing.dumps((i,)) #Second is the shown value
+            curr_choice=(en,i) #Do remember that 'en' is the encryption of the TUPLE
+            choices.append(curr_choice)
+
         model = models.Rating
         # fields = ('user1', 'user2', 'rating')
         fields = ('rating', 'review' )
+        widgets={
+        'rating':RadioSelect(choices=choices),
+        'review': Textarea(attrs={'class':'form-control','rows':5,'cols':40})
+        }
+
 
 class WorkForm(forms.ModelForm):
     #work = forms.CharField(widget=forms.Textarea(attrs={'class':'form-control','rows':5,'cols':40}))

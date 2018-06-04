@@ -141,26 +141,25 @@ class UserDetailView(generic.DetailView):
                 return render(request, error_template ,{'error': "The User with User Id : "+ uid +" does not exist."})
             try:
                 ratings = models.Rating.objects.all().filter(user1=raterid).filter(user2=user).order_by('-updated_at')
+                reviews=decrypt(ratings,'review')
+                ratings = decrypt(ratings,'rating')
+
+
+                #ratings.append('lol')
+                #Have to decrypt it to show to the user.
+
             except ObjectDoesNotExist:
                 current_rating = "Not yet rated by you. Rating Object after these filters doesn't exist."
             try:
                 current_rating = ratings[0]
+                current_review = reviews[0]
                 ratingFound = True
             except :
                 current_rating = "Not yet reviewed by you."
+                current_review="Not yet reviewed by you"
             try :
                 works = models.Work.objects.all().filter(user=user).order_by('-updated_at')#.values('work')
                 works=decrypt(works)
-                #trueworks=[]
-                #for i in works:
-                #    m=i.get('work')
-                #    trueworks.append(m)
-                #works=trueworks
-                #decryptworks=[]
-                #for i in works:
-                #    n=signing.loads(i)
-                #    decryptworks.append(n[0])
-                #works=decryptworks
             except :
                 works = None
 
@@ -170,23 +169,29 @@ class UserDetailView(generic.DetailView):
             else  :
                 form = None
             # Get User Update Forms
-            if raterid == uid :
+            if raterid == uid : #If on your own profile
                 form_work = self.form_class_work(None)
                 form_update = self.form_class_update(initial={'about':rater.about})
             else :
                 form_work = None
                 form_update = None
 
-            ratingFound = False if (uid == raterid) else ratingFound
-            current = True if (uid == raterid) else False
-            user_ratings = []
+            ratingFound = False if (uid == raterid) else ratingFound  #If on your own profile
+            current = True if (uid == raterid) else False   #If on your own profile
+            together = []
             if(current):
                 curr_ratings = models.Rating.objects.filter(user2=rater).order_by('-updated_at')
-                for rating in curr_ratings:
-                    user_ratings.append({'rating':rating.rating,'review':rating.review})
-                print (user_ratings)
+                try:
+                    reviews=decrypt(curr_ratings,'review')
+                    ratings = decrypt(curr_ratings,'rating')
+                except:
+                    reviews=None
+                    ratings=None
+                for j in range(len(reviews)):
+                    together.append({'rating':ratings[j],'review':reviews[j]})
 
-            return render(request, self.template_name, {'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'rating_list':user_ratings, 'rater':rater})#,'decryptworks':decryptworks})
+
+            return render(request, self.template_name, {'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'together':together, 'rater':rater,'current_review':current_review})
 
         else:
             try :
@@ -197,16 +202,6 @@ class UserDetailView(generic.DetailView):
                 return render(request, error_template ,{'error': "The User with User Id : "+ uid +" does not exist."})
             try :
                 works = models.Work.objects.all().filter(user=user).order_by('-updated_at')#.values('work')
-
-                #trueworks=[]
-                #for i in works:
-                #    m=i.get('work')
-                #    trueworks.append(m)
-                #works=trueworks
-                #decryptworks=[]
-                #for i in works:
-                #    n=signing.loads(i)
-                #    decryptworks.append(n[0])
                 works=decrypt(works)
 
             except :
@@ -228,6 +223,7 @@ class UserDetailView(generic.DetailView):
             if form.is_valid() :
                 rnum = form.cleaned_data['rating']
                 rev = form.cleaned_data['review']
+                encryptedreview=signing.dumps((rev,))
                 rater = models.Profile.objects.get(userid = request.user.profile.userid)
                 full_name = target_user.first_name + " " + target_user.last_name
                 if kwargs['uid'] == None :
@@ -246,11 +242,11 @@ class UserDetailView(generic.DetailView):
 
                     if f :
                         robj.rating = rnum
-                        robj.review = rev
+                        robj.review = encryptedreview
                     else :
                         robj = models.Rating(user1 = rater,
                                             user2 = target,
-                                            rating=rnum,review=rev, canEdit = True)
+                                            rating=rnum,review=encryptedreview, canEdit = True)
                     robj.save()
                 return redirect(self.request.path_info)
             elif workform.is_valid() :

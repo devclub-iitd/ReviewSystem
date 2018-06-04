@@ -52,13 +52,20 @@
             <div class="row">
                 <div class="col-sm-12 row">
                     <span class="font-lora col-sm-3">Current Rating by You:</span>
-                    <div class="col-sm-9">{{ current_rated.rating }}</div>
+                    <div class="col-sm-9">{{ current_rated }}</div>
                 </div>
             </div>
+          <!--  <div class="row">
+                <div class="col-sm-12 row">
+                    <span class="font-lora col-sm-3">All Reviews</span>
+                    <div class="col-sm-9">{{reviews}}</div>
+                </div>
+            </div>-->
+
             <div class="row">
                     <div class="col-sm-12 row">
                         <span class="font-lora col-sm-3">Current Review by You:</span>
-                        <div class="col-sm-9">{{ current_rated.review }}</div>
+                        <div class="col-sm-9">{{ current_review }}</div>
                     </div>
             </div>
         <!-- <div class="row">
@@ -106,7 +113,7 @@
         </form>
         {% endif %}
         {% if current %}
-        <table class="table">
+        <!--<table class="table">
             <thead class="thead-light">
                 <tr>
                     <th scope="col" class="col-sm-3">Rating</th>
@@ -117,7 +124,23 @@
                 {% for rating in rating_list %}
                 <tr>
                     <td > <strong>{{ rating.rating }}</strong> </td>
-                    <td > {{ rating.review }}</td>
+                    <td > {{rating.review}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>-->
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col" class="col-sm-3">Rating</th>
+                    <th scope="col" class="col-sm-9">Review</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in together %}
+                <tr>
+                    <td > <strong>{{i.rating}}</strong> </td>
+                    <td > {{i.review}}</td>
                 </tr>
                 {% endfor %}
             </tbody>
