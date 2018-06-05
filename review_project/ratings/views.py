@@ -206,6 +206,7 @@ class UserDetailView(generic.DetailView):
 
             except :
                 works = None
+
             return render(request, self.template_name, {'user':user, 'name':full_name, 'current':False, 'works':works})#,'decryptworks':decryptworks})
 
     def post(self, request, **kwargs):

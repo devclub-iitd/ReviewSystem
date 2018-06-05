@@ -7,6 +7,17 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core import signing
 import datetime
 
+def decrypt(encryptedqueryset,string='work'):
+    dictionary=encryptedqueryset.values(string)
+    trueworks=[]
+    for i in dictionary:
+        m=i.get(string)
+        trueworks.append(m)
+    decryptworks=[]
+    for i in trueworks:
+        n=signing.loads(i)
+        decryptworks.append(n[0])
+    return decryptworks
 
 class Profile(models.Model):
     userid = models.CharField(primary_key=True,unique=True,max_length=6,default='')
@@ -22,9 +33,11 @@ class Profile(models.Model):
     def __str__(self):
         return self.userid
 
+
     def update_ratings(self):
         tnow = datetime.datetime.now()
         rl = Rating.objects.all().filter(user2 = self.userid) # ratings to our user
+
 
         totalRatings = 0
         cum_rating = 0.0
@@ -32,7 +45,13 @@ class Profile(models.Model):
         cur_rating = 0.0
 
         for r in rl :
-            cum_rating += r.rating
+            #decrypt it here
+            m=r.rating
+            decryptm=signing.loads(m)
+            #rate=decrypt(r,'rating')
+            rate=decryptm[0]
+            #cum_rating += r.rating
+            cum_rating+=rate
             totalRatings += 1
             try:
                 tbuff = ((Control.objects.all().order_by('-updated_at'))[0]).TimeBufferForCalc
@@ -40,7 +59,8 @@ class Profile(models.Model):
                 tbuff = 7 * 86400
 
             if abs( r.created_at.timestamp() - tnow.timestamp() ) <= tbuff :
-                cur_rating += r.rating
+                #cur_rating += r.rating
+                cur_rating+=rate
                 recentRatings += 1
         try : # if Divide by zero because of no ratings ?
             self.current_rating   = (int)(cur_rating / recentRatings)
@@ -50,7 +70,7 @@ class Profile(models.Model):
             self.cumulated_rating = 0
 
         # person cannot rate themselves
-        if Rating.objects.all().filter(user1 = self.userid).count() < (User.objects.all().exclude(is_superuser=True).count() - 1 ):
+        if Rating.objects.all().filter(user1 = self.userid).count() < (User.objects.all().exclude(is_superuser=True).count()-1 ):
             self.canSee = False
         else :
             self.canSee = True
