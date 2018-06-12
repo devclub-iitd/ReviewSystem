@@ -14,21 +14,24 @@
         </thead>
         <tbody>
             {% for user in object_list %}
+            {%if user.user.is_superuser%}
+            {%else%}
             <tr>
                 <th scope="col"> <a href="{{ user.get_absolute_url }}">
                     <strong>{{ user.userid }}</strong>
                 </a></th>
                 <td >
-                        {% if ratercansee %} 
-                        <strong>{{ user.current_rating }}</strong> 
+                        {% if ratercansee %}
+                        <strong>{{ user.current_rating }}</strong>
                         {% else %}
                         <strong>Rate everyone to see ratings.</strong>
-                        {% endif %}   
+                        {% endif %}
                 </td>
-                <td > {% if user.get_latest_work %} 
+                <td > {% if user.get_latest_work %}
                     {{ user.get_latest_work }}
-                    {% else %} {% endif %}</td> 
-            </tr>            
+                    {% else %} {% endif %}</td>
+            </tr>
+            {%endif%}
             {% endfor %}
         </tbody>
     </table>
