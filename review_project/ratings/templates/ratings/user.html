@@ -16,13 +16,13 @@
     <div class="padding-15 no-edit">
         <!-- <div class="row">
             <div class="col-sm-12 row">
-                <span class="font-lora col-sm-3">User Name:</span> 
+                <span class="font-lora col-sm-3">User Name:</span>
                 <div class="col-sm-9">{{ name }}</div>
             </div>
         </div>
         <div class="row">
             <div class="col-sm-12 row">
-                <span class="font-lora col-sm-3">User Id:</span> 
+                <span class="font-lora col-sm-3">User Id:</span>
                 <div class="col-sm-9">{{ user.userid }}</div>
             </div>
         </div> -->
@@ -32,7 +32,7 @@
                 <div class="col-sm-9">{{ user.about }}</div>
             </div>
         </div>
-        {% if rater.canSee %}        
+        {% if rater.canSee %}
         <div class="row">
             <div class="col-sm-12 row">
                 <span class="font-lora col-sm-3">Current Rating:</span>
@@ -51,13 +51,13 @@
         {% if ratingFound %}
             <div class="row">
                 <div class="col-sm-12 row">
-                    <span class="font-lora col-sm-3">Current Rating by You:</span> 
-                    <div class="col-sm-9">{{ current_rated.rating }}</div>                    
+                    <span class="font-lora col-sm-3">Current Rating by You:</span>
+                    <div class="col-sm-9">{{ current_rated.rating }}</div>
                 </div>
             </div>
             <div class="row">
                     <div class="col-sm-12 row">
-                        <span class="font-lora col-sm-3">Current Review by You:</span> 
+                        <span class="font-lora col-sm-3">Current Review by You:</span>
                         <div class="col-sm-9">{{ current_rated.review }}</div>
                     </div>
             </div>
@@ -67,7 +67,7 @@
                 </div>
         </div> -->
         {% endif %}
-            
+
         <div class="row">
             <div class="col-sm-12 row">
                 <span class="font-lora col-sm-3">Works:</span>
@@ -84,11 +84,12 @@
         {% if error_message %}
                 <p><strong>{{ error_message }}</strong></p>
         {% endif %}
-        
+
         {% if form and not current %}
         <form  class="form-horizontal" action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            {% for field in form %}
+            {% include 'ratings/genericForm.html'%}
+            <!--{% for field in form %}
                 <div class="form-group row">
                     <div class="col-sm-offset-2 col-sm-10">
                         <span class="text-danger small">{{ field.errors }}</span>
@@ -96,7 +97,7 @@
                     <label class="col-sm-3 col-form-label font-lora">{{ field.label_tag }}</label>
                     <div class="col-sm-3">{{ field }}</div>
                 </div>
-            {% endfor %}
+            {% endfor %}-->
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <button type="submit" class="btn btn-success">Submit</button>
@@ -116,8 +117,8 @@
                 {% for rating in rating_list %}
                 <tr>
                     <td > <strong>{{ rating.rating }}</strong> </td>
-                    <td > {{ rating.review }}</td> 
-                </tr>            
+                    <td > {{ rating.review }}</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -126,12 +127,27 @@
     {% if current %}
     <div class="padding-15 edit-form">
         {% if workform and updateform %}
+        <div class="row">
+            <div class="col-sm-12 row">
+                <span class="font-lora col-sm-3">Works:</span>
+                <div class="col-sm-9 ">
+                        {% for work in works %}
+                            <div class="card work-card">{{ work }}</div>
+                        {% endfor %}
+                </div>
+            </div>
+        </div>
         <form  class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            {% include 'ratings/genericForm.html' with form=workform %}
+            {% include 'ratings/genericForm.html' with form=workform %}   <!---This is for the add work part--->
+            <!--manually create check box form here-->
+            Check the works you want to delete:
+            {%for each in works%}
+            <input type="checkbox" name="working[]" value='{{each}}'>{{each}}
+            {%endfor%}
             <div class="form-group row">
                 <div class="col-sm-offset-2">
-                    <button type="submit" class="btn btn-success">Add work</button>
+                  <button type="submit" class="btn btn-success">Update </button>
                 </div>
             </div>
         </form>
