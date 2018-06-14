@@ -78,15 +78,17 @@
 
         <div class="row">
             <div class="col-sm-12 row">
-                <span class="font-lora col-sm-3">Works:</span>
-                <div class="col-sm-9 ">
-                    <div class="card work-row">
-                        {% for work in works %}
-                            <div class="card work-card">{{ work }}</div>
-                        {% endfor %}
-                    </div>
-                </div>
+                <div class="font-lora col-sm-4">Works:</div>               
             </div>
+        </div>
+        <div class="container" style="margin-left:20px;">
+            <table class="table">
+            <tbody>
+                    {% for work in works %}
+                        <tr><div class="card work-card">{{ work }}</div></tr>
+                    {% endfor %}
+            </tbody>
+        </table> 
         </div>
 
         {% if error_message %}
