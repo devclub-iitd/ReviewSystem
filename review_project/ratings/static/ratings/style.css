@@ -1,6 +1,7 @@
 body{
     background: white url("images/background3.jpg");
     box-sizing: border-box;
+    background-color:rgb(245, 244, 220);
 }
 
 .card, .padding-15{
