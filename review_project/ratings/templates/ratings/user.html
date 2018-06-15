@@ -78,7 +78,7 @@
 
         <div class="row">
             <div class="col-sm-12 row">
-                <div class="font-lora col-sm-4">Works:</div>               
+                <div class="font-lora col-sm-4">Works:</div>
             </div>
         </div>
         <div class="container" style="margin-left:20px;">
@@ -88,7 +88,7 @@
                         <tr><div class="card work-card">{{ work }}</div></tr>
                     {% endfor %}
             </tbody>
-        </table> 
+        </table>
         </div>
 
         {% if error_message %}
@@ -155,6 +155,7 @@
         {% if workform and updateform %}
         <div class="row">
             <div class="col-sm-12 row">
+              {%if works%}
                 <span class="font-lora col-sm-3">Works:</span>
                 <div class="col-sm-9 ">
                         {% for work in works %}
@@ -165,6 +166,7 @@
                         {% endfor %}-->
 
                 </div>
+                {% endif %}
             </div>
         </div>
         <form  class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">

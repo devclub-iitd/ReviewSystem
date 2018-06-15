@@ -88,6 +88,7 @@ class SudoView(View):
     # Add user id to session variables
     @method_decorator(user_passes_test(lambda u: u.is_superuser,login_url='/login/'))
     def get(self,request):
+        logged_in=True
         try :
             ctrl = (models.Control.objects.all().order_by('-updated_at'))[0]
         except :
@@ -95,7 +96,7 @@ class SudoView(View):
 
         form = self.form_class(instance=ctrl)
 
-        return render(request, self.template_name, {'form':form, 'type':"Sudo"})
+        return render(request, self.template_name, {'logged_in':logged_in,'form':form, 'type':"Sudo"})
 
     @method_decorator(user_passes_test(lambda u: u.is_superuser,login_url='/login/'))
     def post(self,request):
@@ -111,7 +112,7 @@ class SudoView(View):
             return redirect(self.request.path_info)
         else :
             # print (form)
-            return render(request, self.template_name, {'form':form, 'type':"Sudo", 'error_message': "Your Sudo form wasn't valid."})
+            return render(request, self.template_name, {'logged_in':logged_in,'form':form, 'type':"Sudo", 'error_message': "Your Sudo form wasn't valid."})
 
 
 class UserDetailView(generic.DetailView):
