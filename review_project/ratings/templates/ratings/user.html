@@ -98,16 +98,24 @@
         {% if form and not current %}
         <form  class="form-horizontal" action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            {% include 'ratings/genericForm.html'%}
-            <!--{% for field in form %}
+            <!--{% include 'ratings/genericForm.html'%}-->
+            {% for field in form %}
                 <div class="form-group row">
                     <div class="col-sm-offset-2 col-sm-10">
                         <span class="text-danger small">{{ field.errors }}</span>
                     </div>
                     <label class="col-sm-3 col-form-label font-lora">{{ field.label_tag }}</label>
+                    {% if field.label == "Rating" %}
+                    {% for radio in field %}
+                    <div class="col-sm-offset-1 col-sm-1">
+                      {{radio}}
+                    </div>
+                    {% endfor %}
+                    {% else %}
                     <div class="col-sm-3">{{ field }}</div>
+                    {% endif %}
                 </div>
-            {% endfor %}-->
+            {% endfor %}
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <button type="submit" class="btn btn-success">Submit</button>
