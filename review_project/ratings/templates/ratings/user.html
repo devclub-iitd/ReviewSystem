@@ -78,7 +78,7 @@
 
         <div class="row">
             <div class="col-sm-12 row">
-                <div class="font-lora col-sm-4">Works:</div>               
+                <div class="font-lora col-sm-4">Works:</div>
             </div>
         </div>
         <div class="container" style="margin-left:20px;">
@@ -88,7 +88,7 @@
                         <tr><div class="card work-card">{{ work }}</div></tr>
                     {% endfor %}
             </tbody>
-        </table> 
+        </table>
         </div>
 
         {% if error_message %}
@@ -98,16 +98,24 @@
         {% if form and not current %}
         <form  class="form-horizontal" action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            {% include 'ratings/genericForm.html'%}
-            <!--{% for field in form %}
+            <!--{% include 'ratings/genericForm.html'%}-->
+            {% for field in form %}
                 <div class="form-group row">
                     <div class="col-sm-offset-2 col-sm-10">
                         <span class="text-danger small">{{ field.errors }}</span>
                     </div>
                     <label class="col-sm-3 col-form-label font-lora">{{ field.label_tag }}</label>
+                    {% if field.label == "Rating" %}
+                    {% for radio in field %}
+                    <div class="col-sm-offset-1 col-sm-1">
+                      {{radio}}
+                    </div>
+                    {% endfor %}
+                    {% else %}
                     <div class="col-sm-3">{{ field }}</div>
+                    {% endif %}
                 </div>
-            {% endfor %}-->
+            {% endfor %}
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <button type="submit" class="btn btn-success">Submit</button>
@@ -155,6 +163,7 @@
         {% if workform and updateform %}
         <div class="row">
             <div class="col-sm-12 row">
+              {%if works%}
                 <span class="font-lora col-sm-3">Works:</span>
                 <div class="col-sm-9 ">
                         {% for work in works %}
@@ -165,13 +174,16 @@
                         {% endfor %}-->
 
                 </div>
+                {% endif %}
             </div>
         </div>
         <form  class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {% include 'ratings/genericForm.html' with form=workform %}   <!---This is for the add work part--->
             <!--manually create check box form here-->
+            {% if works_together%}
             Check the works you want to delete:
+            {% endif %}
             <!--{%for each in works%}
             <input type="checkbox" name="working[]" value='{{each}}'>{{each}}
             {%endfor%}-->
@@ -182,7 +194,7 @@
                 </div>
                 <div class="col-sm-3" style="margin-top:8px">
                     <input type="checkbox" name="working[]" value='{{each.work}}'>
-                </div>               
+                </div>
             </div>
             {%endfor%}
             <div class="form-group row">

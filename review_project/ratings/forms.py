@@ -31,6 +31,9 @@ class RatingForm(forms.ModelForm):
         'rating':RadioSelect(choices=choices),
         'review': Textarea(attrs={'class':'form-control','rows':5,'cols':40})
         }
+        labels={
+        'rating':'Rating'
+        }
 
 
 class WorkForm(forms.ModelForm):
