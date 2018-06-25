@@ -106,15 +106,13 @@
                     </div>
                     <label class="col-sm-3 col-form-label font-lora">{{ field.label_tag }}</label>
                     {% if field.label == "Rating" %}
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-sm-1"></div>
-                            {% for radio in field %}
-                            <div class="col-sm-1">
-                            {{radio}}
-                            </div>
-                            {% endfor %}
+                    <div class="col-sm-9 row">
+                        <div class="col-sm-1"></div>
+                        {% for radio in field %}
+                        <div class="col-sm-1">
+                        {{radio}}
                         </div>
+                        {% endfor %}
                     </div>                                    
                     {% else %}
                     <div class="col-sm-3">{{ field }}</div>
