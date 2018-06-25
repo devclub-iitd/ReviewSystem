@@ -26,6 +26,7 @@ class IndexView(generic.ListView):
     def get(self, request):
         template_name = 'ratings/user.html'
         user = request.user
+
         try:
             current_user = models.Profile.objects.get(userid=user.profile.userid)
         except ObjectDoesNotExist:
@@ -40,7 +41,8 @@ class LeaderBoardView(View):
     def get(self,request):
         object_list = models.Profile.objects.all().order_by('-current_rating')
         ratercansee = request.user.profile.canSee
-        return render(request, self.template_name, {'object_list':object_list,'ratercansee':ratercansee})
+        logged_in=True
+        return render(request, self.template_name, {'object_list':object_list,'ratercansee':ratercansee,'logged_in':logged_in})
 
     # def get_context_data(self, **kwargs):
     #     ctx = super(LeaderBoardView, self).get_context_data(**kwargs)
@@ -50,11 +52,14 @@ class LeaderBoardView(View):
 class RegisterView(View):
     form_class_profile = forms.ProfileForm
     template_name = 'registration/login.html'
+
     def get(self,request):
+        logged_in=False
         form_profile = self.form_class_profile(None)
-        return render(request, self.template_name, {'form':form_profile,"type":"Register"})
+        return render(request, self.template_name, {'form':form_profile,"type":"Register",'logged_in':logged_in})
 
     def post(self,request):
+        logged_in=False
         print ("Received Post Request")
         form_profile = self.form_class_profile(request.POST)
 
@@ -70,7 +75,7 @@ class RegisterView(View):
             print ("Logged in")
             return redirect('ratings:index')
         else:
-            return render(request, self.template_name, {'form':form_profile,"type":"Register"})
+            return render(request, self.template_name, {'form':form_profile,"type":"Register",'logged_in':logged_in})
 
 class UserUpdate(generic.UpdateView):
     model = models.Profile
@@ -83,6 +88,7 @@ class SudoView(View):
     # Add user id to session variables
     @method_decorator(user_passes_test(lambda u: u.is_superuser,login_url='/login/'))
     def get(self,request):
+        logged_in=True
         try :
             ctrl = (models.Control.objects.all().order_by('-updated_at'))[0]
         except :
@@ -90,7 +96,7 @@ class SudoView(View):
 
         form = self.form_class(instance=ctrl)
 
-        return render(request, self.template_name, {'form':form, 'type':"Sudo"})
+        return render(request, self.template_name, {'logged_in':logged_in,'form':form, 'type':"Sudo"})
 
     @method_decorator(user_passes_test(lambda u: u.is_superuser,login_url='/login/'))
     def post(self,request):
@@ -106,7 +112,7 @@ class SudoView(View):
             return redirect(self.request.path_info)
         else :
             # print (form)
-            return render(request, self.template_name, {'form':form, 'type':"Sudo", 'error_message': "Your Sudo form wasn't valid."})
+            return render(request, self.template_name, {'logged_in':logged_in,'form':form, 'type':"Sudo", 'error_message': "Your Sudo form wasn't valid."})
 
 
 class UserDetailView(generic.DetailView):
@@ -116,6 +122,7 @@ class UserDetailView(generic.DetailView):
     template_name = 'ratings/user.html'
 
     def get(self, request,**kwargs):
+        logged_in=True
 
         def decrypt(encryptedqueryset,string='work'):
             dictionary=encryptedqueryset.values(string)
@@ -202,7 +209,7 @@ class UserDetailView(generic.DetailView):
                     together.append({'rating':ratings[j],'review':reviews[j]})
 
 
-            return render(request, self.template_name, {'works_together':works_together, 'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'together':together, 'rater':rater,'current_review':current_review})
+            return render(request, self.template_name, {'logged_in':logged_in,'works_together':works_together, 'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'together':together, 'rater':rater,'current_review':current_review})
 
         else:
             try :
@@ -230,12 +237,13 @@ class UserDetailView(generic.DetailView):
                     start=works[t]
                 works_together.append({'start':start,'work':works[t]})
 
-            return render(request, self.template_name, {'works_together':works_together, 'user':user, 'name':full_name, 'current':False, 'works':works})#,'decryptworks':decryptworks})
+            return render(request, self.template_name, {'logged_in':logged_in,'works_together':works_together, 'user':user, 'name':full_name, 'current':False, 'works':works})#,'decryptworks':decryptworks})
 
     def post(self, request, **kwargs):
         form = self.form_class(request.POST)
         workform = self.form_class_work(request.POST)
         updateform = self.form_class_update(request.POST)
+        logged_in=True
         # avoid insecure access through postman
         try:
             target = models.Profile.objects.get(userid = kwargs['uid'])
