@@ -13,6 +13,13 @@
 
         <div class="col-sm-12 col-md-5 center-small login-form">
             <h3 class="text-center">{{ type }}</h3>
+            {%if type == "Login"%}
+            {% if form.errors %}
+            {%for i in form.errors.values%}
+                <p><strong><center>{{i}}</center></strong></p>
+            {%endfor%}
+            {% endif %}
+            {%endif%}
             {% if error_message %}
                 <p><strong>{{ error_message }}</strong></p>
             {% endif %}
@@ -32,4 +39,3 @@
 </div>
 
 {% endblock %}
-
