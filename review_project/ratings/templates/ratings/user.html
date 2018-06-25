@@ -32,7 +32,7 @@
                 <div class="col-sm-9">{{ user.about }}</div>
             </div>
         </div>
-        
+
         {% if rater.canSee %}
         <div class="row">
             <div class="col-sm-12 row">
@@ -158,6 +158,10 @@
                         {% for work in works %}
                             <div class="card work-card">{{ work }}</div>
                         {% endfor %}
+                        <!--{% for t in works_together %}
+                            <div class="card work-card">{{ t.start }}</div>
+                        {% endfor %}-->
+
                 </div>
             </div>
         </div>
@@ -166,8 +170,11 @@
             {% include 'ratings/genericForm.html' with form=workform %}   <!---This is for the add work part--->
             <!--manually create check box form here-->
             Check the works you want to delete:
-            {%for each in works%}
+            <!--{%for each in works%}
             <input type="checkbox" name="working[]" value='{{each}}'>{{each}}
+            {%endfor%}-->
+            {%for each in works_together%}
+            <input type="checkbox" name="working[]" value='{{each.work}}'>{{each.start}}
             {%endfor%}
             <div class="form-group row">
                 <div class="col-sm-offset-2">

@@ -158,11 +158,22 @@ class UserDetailView(generic.DetailView):
                 current_rating = "Not yet reviewed by you."
                 current_review="Not yet reviewed by you"
             try :
+                works_together=[]
                 works = models.Work.objects.all().filter(user=user).order_by('-updated_at')#.values('work')
-                works=decrypt(works)
+                works=decrypt(works) # Works now consist of a list of decrypted works
             except :
                 works = None
-
+            for t in range(len(works)): # starting part of the works will be grouped togetheer into a new list of dictionaries
+                j=works[t].split()
+                if len(j)>5:
+                    start=""
+                    for m in range(4):
+                        start+=j[m]+" "
+                    start=start.rstrip(" ")
+                    start+="..."
+                else:
+                    start=works[t]
+                works_together.append({'start':start,'work':works[t]})
             rater = models.Profile.objects.get(userid = raterid)
             if rater.canRate :
                 form = self.form_class(None)
@@ -191,7 +202,7 @@ class UserDetailView(generic.DetailView):
                     together.append({'rating':ratings[j],'review':reviews[j]})
 
 
-            return render(request, self.template_name, {'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'together':together, 'rater':rater,'current_review':current_review})
+            return render(request, self.template_name, {'works_together':works_together, 'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'together':together, 'rater':rater,'current_review':current_review})
 
         else:
             try :
@@ -201,13 +212,25 @@ class UserDetailView(generic.DetailView):
             except ObjectDoesNotExist :
                 return render(request, error_template ,{'error': "The User with User Id : "+ uid +" does not exist."})
             try :
+                works_together=[]
                 works = models.Work.objects.all().filter(user=user).order_by('-updated_at')#.values('work')
                 works=decrypt(works)
 
             except :
                 works = None
+            for t in range(len(works)): # starting part of the works will be grouped togetheer into a new list of dictionaries
+                j=works[t].split()
+                if len(j)>5:
+                    start=""
+                    for m in range(4):
+                        start+=j[m]+" "
+                    start=start.rstrip(" ")
+                    start+="..."
+                else:
+                    start=works[t]
+                works_together.append({'start':start,'work':works[t]})
 
-            return render(request, self.template_name, {'user':user, 'name':full_name, 'current':False, 'works':works})#,'decryptworks':decryptworks})
+            return render(request, self.template_name, {'works_together':works_together, 'user':user, 'name':full_name, 'current':False, 'works':works})#,'decryptworks':decryptworks})
 
     def post(self, request, **kwargs):
         form = self.form_class(request.POST)
