@@ -172,6 +172,7 @@ class UserDetailView(generic.DetailView):
                 works = None
             for t in range(len(works)): # starting part of the works will be grouped togetheer into a new list of dictionaries
                 j=works[t].split()
+                '''
                 if len(j)>5:
                     start=""
                     for m in range(4):
@@ -179,7 +180,8 @@ class UserDetailView(generic.DetailView):
                     start=start.rstrip(" ")
                     start+="..."
                 else:
-                    start=works[t]
+                '''
+                start=works[t]
                 works_together.append({'start':start,'work':works[t]})
             rater = models.Profile.objects.get(userid = raterid)
             if rater.canRate :
@@ -227,6 +229,7 @@ class UserDetailView(generic.DetailView):
                 works = None
             for t in range(len(works)): # starting part of the works will be grouped togetheer into a new list of dictionaries
                 j=works[t].split()
+                '''
                 if len(j)>5:
                     start=""
                     for m in range(4):
@@ -234,7 +237,8 @@ class UserDetailView(generic.DetailView):
                     start=start.rstrip(" ")
                     start+="..."
                 else:
-                    start=works[t]
+                '''
+                start=works[t]
                 works_together.append({'start':start,'work':works[t]})
 
             return render(request, self.template_name, {'logged_in':logged_in,'works_together':works_together, 'user':user, 'name':full_name, 'current':False, 'works':works})#,'decryptworks':decryptworks})
