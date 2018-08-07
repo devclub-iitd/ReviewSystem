@@ -19,12 +19,12 @@ $ pip install -r requirements.txt
 2. Using Virtualenv :
 Open the ReviewSystem-master folder then type:
 ```
-$ virtualenv -p python=3 ReviewSystem
+$ virtualenv -p python=3.6 ReviewSystem
 $ . ReviewSystem/bin/activate
 $ pip install -r requirements.txt
 ```
 
-After pip installs the requirements, a folder 'migrations' is created in the app 'ratings' and an empty file '\__init__.py' is added. 
+After pip installs the requirements, a folder 'migrations' is created in the app 'ratings' and an empty file '\py__init__.py' is added. 
 
 ## Running the app for the first time
 
