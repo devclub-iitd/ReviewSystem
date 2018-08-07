@@ -10,7 +10,7 @@ First clone the repository using ```git clone``` . Then run by any of the method
 1. Using Anaconda :
 
 ```
-$ conda create -n ReviewSystem python=3
+$ conda create -n ReviewSystem python=3.6
 $ source activate ReviewSystem
 $ pip install -r requirements.txt
 ```
@@ -23,7 +23,8 @@ $ virtualenv -p python=3 ReviewSystem
 $ . ReviewSystem/bin/activate
 $ pip install -r requirements.txt
 ```
-After pip installs the requirements, a folder 'migrations' is created in the app 'ratings' and an empty file '__init__.py' is added. 
+
+After pip installs the requirements, a folder 'migrations' is created in the app 'ratings' and an empty file '\__init__.py' is added. 
 
 ## Running the app for the first time
 
