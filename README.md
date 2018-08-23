@@ -31,6 +31,7 @@ After pip installs the requirements, a folder 'migrations' is created in the app
 Open the review_project folder and execute the following commands 
 
 ```
+$ mkdir ratings/migrations
 $ touch ratings/migrations/__init__.py
 $ python manage.py makemigrations
 $ python manage.py migrate
