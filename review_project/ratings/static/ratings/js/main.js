@@ -16,9 +16,17 @@ $(document).ready(function(){
         $(".editable").show();
         $(".exit").hide();
     })
+    
     $(".long_work").on("click",function(){
-      alert($(".actual_work").text());
+      $(".actual_work").show();
+      $(".long_work").hide();
     });
+
+    $(".actual_work").on("click",function(){
+      $(".actual_work").hide();
+      $(".long_work").show();
+    });
+    
     $(".long_work").mouseover(function(){
       $(this).css('color','blue');
       $(this).css('cursor','pointer');
