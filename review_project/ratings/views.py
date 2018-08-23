@@ -40,9 +40,29 @@ class LeaderBoardView(View):
     @method_decorator(login_required)
     def get(self,request):
         object_list = models.Profile.objects.all().order_by('-current_rating')
+        #ln=0
+        #lst=[]
         ratercansee = request.user.profile.canSee
         logged_in=True
-        return render(request, self.template_name, {'object_list':object_list,'ratercansee':ratercansee,'logged_in':logged_in})
+        loshortworks=[]
+        for i in object_list:
+            latest_work = i.get_latest_work()
+            try:
+                if len(latest_work)>20:
+                    loshortworks.append(latest_work[:20])
+                else:
+                    loshortworks.append(None)
+            except:
+                loshortworks.append(latest_work)
+        dict =[]
+        for j in range(len(object_list)):
+            if object_list[j].user.is_superuser:
+                continue
+            else:
+                ele = {'profile':object_list[j],'short':loshortworks[j]}
+                dict.append(ele)
+
+        return render(request, self.template_name, {'dict':dict,'object_list':object_list,'ratercansee':ratercansee,'logged_in':logged_in,'loshortworks':loshortworks})
 
     # def get_context_data(self, **kwargs):
     #     ctx = super(LeaderBoardView, self).get_context_data(**kwargs)
@@ -244,7 +264,6 @@ class UserDetailView(generic.DetailView):
                 for j in range(len(reviews)):
                     together.append({'rating':ratings[j],'review':reviews[j]})
 
-
             return render(request, self.template_name, {'logged_in':logged_in,'works_together':works_together, 'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'together':together, 'rater':rater,'current_review':current_review})
 
         else:
@@ -325,7 +344,7 @@ class UserDetailView(generic.DetailView):
                 user.about = about
                 user.save()
                 return redirect(self.request.path_info)
-            
+
             elif workform.is_valid() :
                 onlychoices=request.POST.getlist('working[]') # Returns list of selected checkbox(decrypted)
                 work = workform.cleaned_data['work']
