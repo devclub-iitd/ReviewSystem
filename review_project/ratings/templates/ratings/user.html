@@ -113,7 +113,7 @@
                         {{radio}}
                         </div>
                         {% endfor %}
-                    </div>                                    
+                    </div>
                     {% else %}
                     <div class="col-sm-3">{{ field }}</div>
                     {% endif %}
@@ -168,7 +168,7 @@
             <div class="col-sm-12 row">
               {%if works%}
                 <span class="font-lora col-sm-3">Works:</span>
-                <div class="col-sm-9 ">
+                <div class="col-sm-9">
                         {% for work in works %}
                             <div class="card work-card">{{ work }}</div>
                         {% endfor %}
@@ -192,7 +192,7 @@
             {%endfor%}-->
             {%for each in works_together%}
             <div class="row" style="margin:10px 0px 15px 0px; border-bottom: 1px solid rgb(212, 212, 212)">
-                <div class="col-sm-9" >
+                <div class="col-sm-9"  style="max-height: 72px; overflow:auto;">
                     {{each.start}}
                 </div>
                 <div class="col-sm-3" style="margin-top:8px">

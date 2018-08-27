@@ -161,4 +161,4 @@ class Control(models.Model):
                 rating.save()
 
     def __str__(self):
-        return ("Session Number:" + self.number)
+        return (str(self.SessionNumber))

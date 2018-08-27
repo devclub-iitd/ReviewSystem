@@ -1,6 +1,6 @@
 {% extends 'ratings/base.html' %}
 {% block title %}Leaderboard{% endblock %}
-
+{% load staticfiles %}
 {% block body %}
 <div class="container center-large card">
     <h2 class="text-center">Leaderboard</h2><br><hr>
@@ -13,7 +13,35 @@
             </tr>
         </thead>
         <tbody>
-            {% for user in object_list %}
+            {% for ctr in dict %}
+            {%if ctr.profile.user.is_superuser%}
+            {%else%}
+            <tr>
+                <th scope="col"> <a href="{{ user.get_absolute_url }}">
+                    <strong>{{ ctr.profile.userid }}</strong>
+                </a></th>
+                <td >
+                        {% if ratercansee %}
+                        <strong>{{ ctr.profile.current_rating }}</strong>
+                        {% else %}
+                        <strong>Rate everyone to see ratings.</strong>
+                        {% endif %}
+                </td>
+                <td > {% if ctr.profile.get_latest_work %}
+                        {% if ctr.short %}
+                          <span class = "long_work">{{ctr.short}}...</span>
+                          <span class = "actual_work">{{ctr.profile.get_latest_work}}</span>
+                        {% else%}
+                          <span>{{ ctr.profile.get_latest_work }}</span>
+                        {% endif %}
+                        {% else %}
+                        {% endif %}
+                </td>
+            </tr>
+            {%endif%}
+
+            {% endfor %}
+            <!--{% for user in object_list %}
                 {%if user.user.is_superuser%}
                 {%else%}
                 <tr>
@@ -28,11 +56,12 @@
                             {% endif %}
                     </td>
                     <td > {% if user.get_latest_work %}
-                        {{ user.get_latest_work }}
+
+                        <span class = "workleaderboardshow">Show</span><span class= "workleaderboard">{{ user.get_latest_work }}</span>
                         {% else %} {% endif %}</td>
                 </tr>
                 {%endif%}
-            {% endfor %}
+            {% endfor %}-->
         </tbody>
     </table>
 </div>
