@@ -3,7 +3,7 @@ $(document).ready(function(){
     $("input").addClass("form-control");
     $(".edit-form").hide();
     $(".exit").hide();
-    $(".actual_work").hide()
+    $(".actual_work").hide();
     $(".editable").on("click",function(){
         $(".edit-form").show();
         $(".no-edit").hide();
@@ -18,9 +18,9 @@ $(document).ready(function(){
     })
 
     $(".long_work").on("click",function(){
-      //$(".actual_work").show();
-      //$(".long_work").hide();
-      alert($(".actual_work").text());
+      $(".actual_work").show();
+      $(".long_work").hide();
+      //alert($(".actual_work").text());
     });
 
 
