@@ -17,7 +17,7 @@
             {%if ctr.profile.user.is_superuser%}
             {%else%}
             <tr>
-                <th scope="col"> <a href="{{ user.get_absolute_url }}">
+                <th scope="col"> <a href="{{ ctr.profile.get_absolute_url }}">
                     <strong>{{ ctr.profile.userid }}</strong>
                 </a></th>
                 <td >
