@@ -23,10 +23,6 @@ $(document).ready(function(){
       alert($(".actual_work").text());
     });
 
-    //$(".actual_work").on("click",function(){
-      //$(".actual_work").hide();
-      //$(".long_work").show();
-    //});
 
     $(".long_work").mouseover(function(){
       $(this).css('color','blue');
