@@ -22,7 +22,11 @@ $(document).ready(function(){
       $(".long_work").hide();
       //alert($(".actual_work").text());
     });
-
+    
+    $(".actual_work").on("click",function(){
+      $(".long_work").show();
+      $(".actual_work").hide();
+    });
 
     $(".long_work").mouseover(function(){
       $(this).css('color','blue');
