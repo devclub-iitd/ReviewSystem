@@ -48,8 +48,8 @@ class LeaderBoardView(View):
         for i in object_list:
             latest_work = i.get_latest_work()
             try:
-                if len(latest_work)>20:
-                    loshortworks.append(latest_work[:20])
+                if len(latest_work)>40:
+                    loshortworks.append(latest_work[:40])
                 else:
                     loshortworks.append(None)
             except:
