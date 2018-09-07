@@ -129,6 +129,7 @@ class SudoView(View):
             objects = (models.Control.objects.all().order_by('-updated_at'))
             if objects: #false if null
                 if SessionNumber == objects[0].SessionNumber:
+                #if same SessionNumber,then delete current object and create new
                     objects[0].delete()
 
             RegistrationEnabled=form.cleaned_data['RegistrationEnabled']
