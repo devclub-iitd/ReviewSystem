@@ -73,14 +73,14 @@ class RegisterView(View):
     form_class_profile = forms.ProfileForm
     template_name = 'registration/login.html'
 
-    def get(self,request):
-        logged_in=False
-        trial= (models.Control.objects.all().order_by('-updated_at'))[0]
-        registration=trial.RegistrationEnabled
+    def get(self, request):
+        logged_in = False
+        trial = (models.Control.objects.all().order_by('-updated_at'))[0]
+        registration = trial.RegistrationEnabled
         if registration:
             form_profile = self.form_class_profile(None)
         else:
-            form_profile=None
+            form_profile = None
 
         return render(request, self.template_name, {'form':form_profile,"type":"Register",'logged_in':logged_in,'registration':registration})
 
@@ -105,7 +105,7 @@ class RegisterView(View):
 
 class UserUpdate(generic.UpdateView):
     model = models.Profile
-    fields = ['name','about','updated_at','work']
+    fields = ['name', 'about', 'updated_at', 'work']
 
 ########################################## Do @ superuserloginrequired here ###################################
 class SudoView(View):
@@ -113,11 +113,11 @@ class SudoView(View):
     template_name = 'registration/login.html'
     # Add user id to session variables
     @method_decorator(user_passes_test(lambda u: u.is_superuser,login_url='/login/'))
-    def get(self,request):
-        logged_in=True
+    def get(self, request):
+        logged_in = True
         try :
             ctrl = (models.Control.objects.all().order_by('-updated_at'))[0]
-            registration=ctrl.RegistrationEnabled
+            registration = ctrl.RegistrationEnabled
         except :
             ctrl = models.Control()
 
@@ -175,23 +175,23 @@ class UserDetailView(generic.DetailView):
     form_class_update = forms.UserUpdateForm
     template_name = 'ratings/user.html'
 
-    def get(self, request,**kwargs):
-        logged_in=True
+    def get(self, request, **kwargs):
+        logged_in = True
 
-        def decrypt(encryptedqueryset,string='work'):
-            dictionary=encryptedqueryset.values(string)
-            trueworks=[]
+        def decrypt(encryptedqueryset, string='work'):
+            dictionary = encryptedqueryset.values(string)
+            trueworks = []
             for i in dictionary:
-                m=i.get(string)
+                m = i.get(string)
                 trueworks.append(m)
-            decryptworks=[]
+            decryptworks = []
             for i in trueworks:
-                n=signing.loads(i)
+                n = signing.loads(i)
                 decryptworks.append(n[0])
             return decryptworks
 
         uid = kwargs['uid'] # target user
-        if request.user :
+        if request.user:
             raterid = request.user.profile.userid
             ratingFound = False
             try:
@@ -199,32 +199,31 @@ class UserDetailView(generic.DetailView):
                 target_user = models.User.objects.get(username=uid)
                 full_name = target_user.first_name + " " + target_user.last_name
             except ObjectDoesNotExist:
-                return render(request, error_template ,{'error': "The User with User Id : "+ uid +" does not exist."})
+                return render(request, error_template, {'error': "The User with User Id : "+ uid +" does not exist."})
+
             try:
                 ratings = models.Rating.objects.all().filter(user1=raterid).filter(user2=user).order_by('-updated_at')
                 reviews=decrypt(ratings,'review')
                 ratings = decrypt(ratings,'rating')
-
-
-                #ratings.append('lol')
-                #Have to decrypt it to show to the user.
-
             except ObjectDoesNotExist:
                 current_rating = "Not yet rated by you. Rating Object after these filters doesn't exist."
+            
             try:
                 current_rating = ratings[0]
                 current_review = reviews[0]
                 ratingFound = True
-            except :
+            except:
                 current_rating = "Not yet reviewed by you."
-                current_review="Not yet reviewed by you"
-            try :
-                works_together=[]
-                works = models.Work.objects.all().filter(user=user).order_by('-updated_at')#.values('work')
+                current_review = "Not yet reviewed by you"
+            
+            try:
+                works_together = []
+                works = models.Work.objects.all().filter(user=user).order_by('-updated_at') #.values('work')
                 works=decrypt(works) # Works now consist of a list of decrypted works
             except :
                 works = None
-            for t in range(len(works)): # starting part of the works will be grouped togetheer into a new list of dictionaries
+            
+            for t in range(len(works)): # starting part of the works will be grouped together into a new list of dictionaries
                 j=works[t].split()
                 '''
                 if len(j)>5:
@@ -235,7 +234,7 @@ class UserDetailView(generic.DetailView):
                     start+="..."
                 else:
                 '''
-                start=works[t]
+                start = works[t]
                 works_together.append({'start':start,'work':works[t]})
             rater = models.Profile.objects.get(userid = raterid)
             if rater.canRate :
@@ -256,7 +255,7 @@ class UserDetailView(generic.DetailView):
             if(current):
                 curr_ratings = models.Rating.objects.filter(user2=rater).order_by('-updated_at')
                 try:
-                    reviews=decrypt(curr_ratings,'review')
+                    reviews = decrypt(curr_ratings,'review')
                     ratings = decrypt(curr_ratings,'rating')
                 except:
                     reviews=None
@@ -276,7 +275,7 @@ class UserDetailView(generic.DetailView):
             try :
                 works_together=[]
                 works = models.Work.objects.all().filter(user=user).order_by('-updated_at')#.values('work')
-                works=decrypt(works)
+                works = decrypt(works)
 
             except :
                 works = None
