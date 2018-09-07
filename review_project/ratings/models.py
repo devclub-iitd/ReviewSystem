@@ -40,7 +40,7 @@ class Profile(models.Model):
         # tnow = datetime.datetime.now()
 
         # A control object must be present
-        recent_control = (Control.objects.all().order_by('-updated_at'))[0]
+        recent_control = (Control.objects.latest('updated_at'))
         recent_session_number = recent_control.session_number
         threshold = recent_control.threshold_persons
 
@@ -80,6 +80,8 @@ class Profile(models.Model):
         
         # person has rated less than threshold then don't allow to see
         self.can_see = ( num_current_rated < threshold ) ? False : True 
+        
+        self.save()
 
     def get_absolute_url(self):
         return ("/user/"+self.userid)
@@ -114,15 +116,15 @@ class Rating(models.Model):
     session_number = models.IntegerField(default=0)
     
     #user1 rating to user2
-    user1   = models.ForeignKey(Profile,on_delete=models.CASCADE,related_name='Profile1')
-    user2   = models.ForeignKey(Profile,on_delete=models.CASCADE,related_name='Profile2')
+    user1 = models.ForeignKey(Profile,on_delete=models.CASCADE,related_name='Profile1')
+    user2 = models.ForeignKey(Profile,on_delete=models.CASCADE,related_name='Profile2')
     
     # Integer field before
     #rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
     
     # Changed because now encrypted char field
-    rating  = models.CharField(max_length=100)
-    review  = models.CharField(max_length=1024)
+    rating = models.CharField(max_length=100)
+    review = models.CharField(max_length=1024)
     
     can_edit = models.BooleanField() # Is the rating editable 
 
@@ -154,27 +156,23 @@ class Control(models.Model):
 
     threshold_persons = models.PositiveIntegerField(default=0)
 
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def updateOthers(self):
         userlist = Profile.objects.all()
         for user in  userlist:
-            # can see and rate overwritten before
-            user.can_see  = self.everyone_can_see
             user.can_rate = self.everyone_can_rate
-            if self.update_everyone :
-                user.update_ratings()
             user.save()
+            if self.update_everyone :
+                user.updateMyRating()
 
-        ratings = Rating.objects.all()
+        ratings = Rating.objects.all().filter(session_number = self.session_number)
 
+        # For current batch of ratings, make them editable or un-editable
         for rating in ratings :
-            # if abs ( rating.created_at.timestamp() - tnow.timestamp() ) <= self.TimeLimitForRatingEdits :
-            if rating.session_number == self.session_number : 
-                rating.can_edit = self.everyone_can_edit
-                rating.save()
+            rating.can_edit = self.everyone_can_edit
+            rating.save()
 
     def __str__(self):
         return (str(self.session_number))
