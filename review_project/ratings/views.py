@@ -75,8 +75,13 @@ class RegisterView(View):
 
     def get(self,request):
         logged_in=False
-        trial= (models.Control.objects.all().order_by('-updated_at'))[0]
-        registration=trial.RegistrationEnabled
+        try :
+            trial= (models.Control.objects.all().order_by('-updated_at'))[0]
+            registration=trial.RegistrationEnabled
+        except:
+            # If not found allow registration as object likley not created
+            registration = True
+        
         if registration:
             form_profile = self.form_class_profile(None)
         else:
@@ -117,7 +122,7 @@ class SudoView(View):
         logged_in=True
         try :
             ctrl = (models.Control.objects.all().order_by('-updated_at'))[0]
-            registration=ctrl.RegistrationEnabled
+            registration=ctrl.Regis trationEnabled
         except :
             ctrl = models.Control()
 
