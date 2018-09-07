@@ -124,28 +124,29 @@ class SudoView(View):
         form = self.form_class(request.POST)
 
         if form.is_valid() :
-            SessionNumber=form.cleaned_data['SessionNumber']
+            SessionNumber = form.cleaned_data['SessionNumber']
             # commit = False ?
-            objects = (models.Control.objects.all().order_by('-updated_at'))
-            if objects: #false if null
-                if SessionNumber == objects[0].SessionNumber:
-                #if same SessionNumber,then delete current object and create new
-                    objects[0].delete()
 
-            RegistrationEnabled=form.cleaned_data['RegistrationEnabled']
-            EveryoneCanSee=form.cleaned_data['EveryoneCanSee']
-            EveryoneCanRate=form.cleaned_data['EveryoneCanRate']
-            EveryoneCanEdit=form.cleaned_data['EveryoneCanEdit']
-            UpdateEveryone=form.cleaned_data['UpdateEveryone']
-            ctrl = models.Control(SessionNumber=SessionNumber,RegistrationEnabled=RegistrationEnabled,
-            EveryoneCanSee=EveryoneCanSee,EveryoneCanEdit=EveryoneCanEdit,EveryoneCanRate=EveryoneCanRate,
-            UpdateEveryone=UpdateEveryone)
-            ctrl.updateOthers()
+            latest_ctrl = models.Control.objects.latest('updated_at')
+            
+            #if same SessionNumber,then delete current object and create new
+            if (latest_ctrl is not None) and (SessionNumber == latest_ctrl.session_number):
+                latest_ctrl.delete()
+
+            registration_enabled=form.cleaned_data['registration_enabled']
+            everyone_can_rate=form.cleaned_data['everyone_can_rate']
+            everyone_can_edit=form.cleaned_data['everyone_can_edit']
+            update_everyone=form.cleaned_data['update_everyone']
+
+            ctrl = models.Control(session_number=SessionNumber,registration_enabled=registration_enabled,
+            everyone_can_edit=everyone_can_edit,everyone_can_rate=everyone_can_rate,update_everyone=update_everyone)
+
             ctrl.save()
+            ctrl.updateOthers()
+
             # idk why but just do it
             return redirect(self.request.path_info)
         else :
-            # print (form)
             return render(request, self.template_name, {'logged_in':logged_in,'form':form, 'type':"Sudo", 'error_message': "Your Sudo form wasn't valid."})
 
 
