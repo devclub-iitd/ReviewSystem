@@ -44,7 +44,7 @@ class Profile(models.Model):
         recent_session_number = recent_control.session_number
         threshold = recent_control.threshold_persons
 
-        current_ratings_list = Rating.objects.all().filter(user2 = self.userid).filter(session_number = recent_session_number) # ratings to our user
+        ratings_list = Rating.objects.all().filter(user2 = self.userid) # ratings to our user
 
         # to calculate total ratings
         total_num_ratings = 0
@@ -54,7 +54,7 @@ class Profile(models.Model):
         recent_ratings = 0
         current_rating = 0.0
 
-        for rating in current_ratings_list :
+        for rating in ratings_list :
             #decrypt it here
             encrypted_rating = rating.rating
             decrypted_rating = signing.loads(encrypted_rating)
@@ -149,7 +149,6 @@ class Control(models.Model):
     # Control fields
     session_number = models.IntegerField(default=0)
     registration_enabled = models.BooleanField(default=True)
-    everyone_can_see  = models.BooleanField(default=True)
     everyone_can_rate = models.BooleanField(default=True)
     everyone_can_edit = models.BooleanField(default=True) # doesn't overwrite 
     update_everyone  = models.BooleanField(default=True)

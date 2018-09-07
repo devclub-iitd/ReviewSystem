@@ -65,4 +65,4 @@ class SudoForm(forms.ModelForm):
 
     class Meta:
         model = models.Control
-        fields = ('session_number', 'registration_enabled' , 'everyone_can_see', 'everyone_can_rate', 'everyone_can_edit', 'update_everyone' )
+        fields = ('session_number', 'registration_enabled', 'everyone_can_rate', 'everyone_can_edit', 'update_everyone' )
