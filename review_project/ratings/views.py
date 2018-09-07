@@ -81,7 +81,7 @@ class RegisterView(View):
         except:
             # If not found allow registration as object likley not created
             registration = True
-        
+
         if registration:
             form_profile = self.form_class_profile(None)
         else:
@@ -125,7 +125,7 @@ class SudoView(View):
             registration=ctrl.RegistrationEnabled
         except :
             ctrl = models.Control()
-
+            registration = True
         form = self.form_class(instance=ctrl)
 
         return render(request, self.template_name, {'registration':registration,'logged_in':logged_in,'form':form, 'type':"Sudo"})
@@ -137,34 +137,22 @@ class SudoView(View):
         if form.is_valid() :
             SessionNumber=form.cleaned_data['SessionNumber']
             # commit = False ?
-            try:
-                ctrl = (models.Control.objects.all().order_by('-updated_at'))[0]
-                if ctrl.SessionNumber==SessionNumber: #Don't create new query object, instead change the current
-                    ctrl.RegistrationEnabled=form.cleaned_data['RegistrationEnabled']
-                    ctrl.EveryoneCanSee=form.cleaned_data['EveryoneCanSee']
-                    ctrl.EveryoneCanRate=form.cleaned_data['EveryoneCanRate']
-                    ctrl.EveryoneCanEdit=form.cleaned_data['EveryoneCanEdit']
-                    ctrl.UpdateEveryone=form.cleaned_data['UpdateEveryone']
+            objects = (models.Control.objects.all().order_by('-updated_at'))
+            if objects: #false if null
+                if SessionNumber != objects[0].SessionNumber:
+                    pass;
                 else:
-                    RegistrationEnabled=form.cleaned_data['RegistrationEnabled']
-                    EveryoneCanSee=form.cleaned_data['EveryoneCanSee']
-                    EveryoneCanRate=form.cleaned_data['EveryoneCanRate']
-                    EveryoneCanEdit=form.cleaned_data['EveryoneCanEdit']
-                    UpdateEveryone=form.cleaned_data['UpdateEveryone']
-                    new_ctrl=models.Control(SessionNumber=SessionNumber,RegistrationEnabled=RegistrationEnabled,
-                    EveryoneCanSee=EveryoneCanSee,EveryoneCanEdit=EveryoneCanEdit,EveryoneCanRate=EveryoneCanRate,
-                    UpdateEveryone=UpdateEveryone)
-                    ctrl=new_ctrl
-            except:
-                RegistrationEnabled=form.cleaned_data['RegistrationEnabled']
-                EveryoneCanSee=form.cleaned_data['EveryoneCanSee']
-                EveryoneCanRate=form.cleaned_data['EveryoneCanRate']
-                EveryoneCanEdit=form.cleaned_data['EveryoneCanEdit']
-                UpdateEveryone=form.cleaned_data['UpdateEveryone']
-                new_ctrl=models.Control(SessionNumber=SessionNumber,RegistrationEnabled=RegistrationEnabled,
-                EveryoneCanSee=EveryoneCanSee,EveryoneCanEdit=EveryoneCanEdit,EveryoneCanRate=EveryoneCanRate,
-                UpdateEveryone=UpdateEveryone)
-                ctrl=new_ctrl
+                    objects[0].delete()
+                    #ctrl.SessionNumber = SessionNumber
+
+            RegistrationEnabled=form.cleaned_data['RegistrationEnabled']
+            EveryoneCanSee=form.cleaned_data['EveryoneCanSee']
+            EveryoneCanRate=form.cleaned_data['EveryoneCanRate']
+            EveryoneCanEdit=form.cleaned_data['EveryoneCanEdit']
+            UpdateEveryone=form.cleaned_data['UpdateEveryone']
+            ctrl = models.Control(SessionNumber=SessionNumber,RegistrationEnabled=RegistrationEnabled,
+            EveryoneCanSee=EveryoneCanSee,EveryoneCanEdit=EveryoneCanEdit,EveryoneCanRate=EveryoneCanRate,
+            UpdateEveryone=UpdateEveryone)
             ctrl.updateOthers()
             ctrl.save()
             # idk why but just do it
