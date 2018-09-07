@@ -42,7 +42,7 @@ class LeaderBoardView(View):
         object_list = models.Profile.objects.all().order_by('-current_rating')
         #ln=0
         #lst=[]
-        ratercansee = request.user.profile.canSee
+        ratercansee = request.user.profile.can_see
         logged_in=True
         loshortworks=[]
         for i in object_list:
@@ -78,7 +78,7 @@ class RegisterView(View):
         # Assume the control object is available
         ctrl_latest = models.Control.objects.latest('updated_at')
         # Don't send a form profie if registration is disabled
-        form_profile = ctrl_latest.registration_enabled ? self.form_class_profile(None) : None 
+        form_profile = ctrl_latest.registration_enabled ? self.form_class_profile(None) : None
 
         return render(request, self.template_name, {'form':form_profile, "type":"Register", 'logged_in':self.logged_in, 'registration':registration})
 
@@ -128,7 +128,7 @@ class SudoView(View):
             # commit = False ?
 
             latest_ctrl = models.Control.objects.latest('updated_at')
-            
+
             #if same SessionNumber,then delete current object and create new
             if (latest_ctrl is not None) and (SessionNumber == latest_ctrl.session_number):
                 latest_ctrl.delete()
@@ -260,7 +260,7 @@ class UserDetailView(generic.DetailView):
                     try:
                         ratings = models.Rating.objects.all().filter(user1=rater).filter(user2=target).order_by('-updated_at')
                         robj = ratings[0]
-                        if (not robj.canEdit) :
+                        if (not robj.can_edit) :
                             f = False
                     except :
                         f = False
@@ -271,7 +271,7 @@ class UserDetailView(generic.DetailView):
                     else :
                         robj = models.Rating(user1 = rater,
                                             user2 = target,
-                                            rating=rnum,review=encryptedreview, canEdit = True)
+                                            rating=rnum,review=encryptedreview, can_edit = True)
                     robj.save()
                 return redirect(self.request.path_info)
             elif updateform.is_valid() :
