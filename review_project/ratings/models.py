@@ -145,7 +145,6 @@ class Work(models.Model):
         return self.work
 
 class Control(models.Model):
-
     # Control fields
     session_number = models.IntegerField(default=0)
     registration_enabled = models.BooleanField(default=True)
