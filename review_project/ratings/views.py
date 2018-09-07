@@ -78,7 +78,8 @@ class RegisterView(View):
         # Assume the control object is available
         ctrl_latest = models.Control.objects.latest('updated_at')
         # Don't send a form profie if registration is disabled
-        form_profile = self.form_class_profile(None) if ctrl_latest.registration_enabled else None
+        registration = ctrl_latest.registration_enabled
+        form_profile = self.form_class_profile(None) if registration else None
 
         return render(request, self.template_name, {'form':form_profile, "type":"Register", 'logged_in':self.logged_in, 'registration':registration})
 
@@ -227,7 +228,8 @@ class UserDetailView(generic.DetailView):
                 except:
                     reviews = None
                     ratings = None
-            return render(request, self.template_name, {'logged_in':True, 'works_together':decrypted_works, 'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'together':together, 'rater':rater,'current_review':current_review})
+
+            return render(request, self.template_name, {'logged_in':True, 'works_together':decrypted_works, 'user':user_profile, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'together':all_ratings, 'rater':rater,'current_review':current_review})
         else:
             return render(request, error_template, {'error': "No such user exists. Please validate your request."})
 
