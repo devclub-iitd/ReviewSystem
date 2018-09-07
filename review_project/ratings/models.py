@@ -1,5 +1,4 @@
 from django.db import models
-from django.conf import settings
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
@@ -23,57 +22,66 @@ class Profile(models.Model):
     userid = models.CharField(primary_key=True,unique=True,max_length=6,default='')
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     about = models.CharField(max_length=200)
-    canSee = models.BooleanField(default=True)
-    canRate = models.BooleanField(default=True)
+    can_see = models.BooleanField(default=True)
+    can_rate = models.BooleanField(default=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    current_rating = models.PositiveIntegerField(MaxValueValidator(10),default=0)
-    cumulated_rating = models.PositiveIntegerField(MaxValueValidator(10),default=0)
+    current_rating = models.FloatField(default=0.0,validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
+    cumulated_rating = models.FloatField(default=0.0,validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
+
+    # ImageField¶ While adding profile pictures
+    # class ImageField(upload_to=None, height_field=None, width_field=None, max_length=100, **options)
 
     def __str__(self):
         return self.userid
 
 
-    def update_ratings(self):
-        tnow = datetime.datetime.now()
-        rl = Rating.objects.all().filter(user2 = self.userid) # ratings to our user
+    def updateMyRating(self):
+        # tnow = datetime.datetime.now()
 
+        # A control object must be present
+        recent_control = (Control.objects.latest('updated_at'))
+        recent_session_number = recent_control.session_number
+        threshold = recent_control.threshold_persons
 
-        totalRatings = 0
-        cum_rating = 0.0
-        recentRatings = 0
-        cur_rating = 0.0
+        ratings_list = Rating.objects.all().filter(user2 = self.userid) # ratings to our user
 
-        for r in rl :
+        # to calculate total ratings
+        total_num_ratings = 0
+        cumulative_rating = 0.0
+
+        # to calculate this session's ratings
+        recent_ratings = 0
+        current_rating = 0.0
+
+        for rating in ratings_list :
             #decrypt it here
-            m=r.rating
-            decryptm=signing.loads(m)
-            #rate=decrypt(r,'rating')
-            rate=decryptm[0]
-            #cum_rating += r.rating
-            cum_rating+=rate
-            totalRatings += 1
-            try:
-                tbuff = ((Control.objects.all().order_by('-updated_at'))[0]).TimeBufferForCalc
-            except:
-                tbuff = 7 * 86400
+            encrypted_rating = rating.rating
+            decrypted_rating = signing.loads(encrypted_rating)
+            rate = decrypted_rating[0]
+            #cumulative_rating += r.rating
+            cumulative_rating += rate
+            total_num_ratings += 1
 
-            if abs( r.created_at.timestamp() - tnow.timestamp() ) <= tbuff :
-                #cur_rating += r.rating
-                cur_rating+=rate
-                recentRatings += 1
-        try : # if Divide by zero because of no ratings ?
-            self.current_rating   = (int)(cur_rating / recentRatings)
-            self.cumulated_rating = (int)(cum_rating / totalRatings )
-        except :
-            self.current_rating   = 0
-            self.cumulated_rating = 0
+            if rating.session_number == recent_session_number :
+                current_rating += rate
+                recent_ratings += 1
 
-        # person cannot rate themselves
-        if Rating.objects.all().filter(user1 = self.userid).count() < (User.objects.all().exclude(is_superuser=True).count()-1 ):
-            self.canSee = False
-        else :
-            self.canSee = True
+        
+        #  if Divide by zero because of no ratings 
+        total_num_ratings = (total_num_ratings > 0 ) ? total_num_ratings : 1
+        recent_ratings    = (recent_ratings    > 0 ) ? recent_ratings    : 1 
+
+        self.current_rating   = (current_rating / recent_ratings )
+        self.cumulated_rating = (cumulative_rating / total_num_ratings )
+
+        num_current_rated = Rating.objects.all().filter(user1 = self.userid).filter(session_number = recent_session_number).count()
+        num_users = User.objects.all().exclude(is_superuser=True).count()
+        
+        # person has rated less than threshold then don't allow to see
+        self.can_see = ( num_current_rated < threshold ) ? False : True 
+        
+        self.save()
 
     def get_absolute_url(self):
         return ("/user/"+self.userid)
@@ -81,13 +89,15 @@ class Profile(models.Model):
     def get_latest_work(self):
         works = Work.objects.filter(user=self).order_by('-updated_at').values('work')
         trueworks=[]
-        for i in works:
-            m=i.get('work')
-            trueworks.append(m)
-        works=trueworks
+        
+        for work in works:
+            data = work.get('work')
+            trueworks.append(data)
+        works = trueworks
+
         try:
             latest_work = works[0]
-            decrypted_work=signing.loads(latest_work)
+            decrypted_work = signing.loads(latest_work)
             return decrypted_work[0]
         except:
             return None
@@ -102,13 +112,22 @@ class Profile(models.Model):
         instance.profile.save()
 
 class Rating(models.Model):
+    # Session number for versioning
+    session_number = models.IntegerField(default=0)
+    
     #user1 rating to user2
-    user1  = models.ForeignKey(Profile,on_delete=models.CASCADE,related_name='Profile1')
-    user2  = models.ForeignKey(Profile,on_delete=models.CASCADE,related_name='Profile2')
+    user1 = models.ForeignKey(Profile,on_delete=models.CASCADE,related_name='Profile1')
+    user2 = models.ForeignKey(Profile,on_delete=models.CASCADE,related_name='Profile2')
+    
+    # Integer field before
     #rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
-    rating=models.CharField(max_length=100)
+    
+    # Changed because now encrypted char field
+    rating = models.CharField(max_length=100)
     review = models.CharField(max_length=1024)
-    canEdit = models.BooleanField()
+    
+    can_edit = models.BooleanField() # Is the rating editable 
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -126,17 +145,15 @@ class Work(models.Model):
         return self.work
 
 class Control(models.Model):
-    SessionNumber = models.IntegerField(default=0)
-    # CHOICES=[( True ,'Enable'), # Make strings if True and False naievly doesn't work
-    #         (False,'Disable')]
 
-    RegistrationEnabled = models.BooleanField(default=True)
-    EveryoneCanSee  = models.BooleanField(default=True)
-    EveryoneCanRate = models.BooleanField(default=True)
-    EveryoneCanEdit = models.BooleanField(default=True)
-    UpdateEveryone  = models.BooleanField(default=True)
-    TimeBufferForCalc = models.IntegerField(default=(7*86400))
-    TimeLimitForRatingEdits = models.IntegerField(default=(2*86400))
+    # Control fields
+    session_number = models.IntegerField(default=0)
+    registration_enabled = models.BooleanField(default=True)
+    everyone_can_rate = models.BooleanField(default=True)
+    everyone_can_edit = models.BooleanField(default=True) # doesn't overwrite 
+    update_everyone  = models.BooleanField(default=True)
+
+    threshold_persons = models.PositiveIntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -144,21 +161,17 @@ class Control(models.Model):
     def updateOthers(self):
         userlist = Profile.objects.all()
         for user in  userlist:
-            user.canSee  = self.EveryoneCanSee
-            user.canRate = self.EveryoneCanRate
-            if self.UpdateEveryone :
-                user.update_ratings()
+            user.can_rate = self.everyone_can_rate
             user.save()
+            if self.update_everyone :
+                user.updateMyRating()
 
-        ratings = Rating.objects.all()
-        tnow = datetime.datetime.now()
+        ratings = Rating.objects.all().filter(session_number = self.session_number)
 
+        # For current batch of ratings, make them editable or un-editable
         for rating in ratings :
-            # find a better way than this because without
-            print ( abs ( rating.created_at.timestamp() - tnow.timestamp() ) )
-            if abs ( rating.created_at.timestamp() - tnow.timestamp() ) <= self.TimeLimitForRatingEdits :
-                rating.canEdit = self.EveryoneCanEdit
-                rating.save()
+            rating.can_edit = self.everyone_can_edit
+            rating.save()
 
     def __str__(self):
-        return (str(self.SessionNumber))
+        return (str(self.session_number))
