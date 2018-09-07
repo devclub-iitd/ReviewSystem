@@ -69,8 +69,8 @@ class Profile(models.Model):
 
         
         #  if Divide by zero because of no ratings 
-        total_num_ratings = (total_num_ratings > 0 ) ? total_num_ratings : 1
-        recent_ratings    = (recent_ratings    > 0 ) ? recent_ratings    : 1 
+        total_num_ratings = total_num_ratings if (total_num_ratings > 0 ) else 1
+        recent_ratings    = recent_ratings if (recent_ratings > 0 ) else 1 
 
         self.current_rating   = (current_rating / recent_ratings )
         self.cumulated_rating = (cumulative_rating / total_num_ratings )
@@ -79,7 +79,7 @@ class Profile(models.Model):
         num_users = User.objects.all().exclude(is_superuser=True).count()
         
         # person has rated less than threshold then don't allow to see
-        self.can_see = ( num_current_rated < threshold ) ? False : True 
+        self.can_see = False if ( num_current_rated < threshold ) else True 
         
         self.save()
 

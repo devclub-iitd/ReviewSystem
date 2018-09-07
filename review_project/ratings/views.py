@@ -78,7 +78,7 @@ class RegisterView(View):
         # Assume the control object is available
         ctrl_latest = models.Control.objects.latest('updated_at')
         # Don't send a form profie if registration is disabled
-        form_profile = ctrl_latest.registration_enabled ? self.form_class_profile(None) : None 
+        form_profile = self.form_class_profile(None) if ctrl_latest.registration_enabled else None 
 
         return render(request, self.template_name, {'form':form_profile, "type":"Register", 'logged_in':self.logged_in, 'registration':registration})
 
