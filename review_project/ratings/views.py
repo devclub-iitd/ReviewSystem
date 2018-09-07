@@ -139,11 +139,8 @@ class SudoView(View):
             # commit = False ?
             objects = (models.Control.objects.all().order_by('-updated_at'))
             if objects: #false if null
-                if SessionNumber != objects[0].SessionNumber:
-                    pass;
-                else:
+                if SessionNumber == objects[0].SessionNumber:
                     objects[0].delete()
-                    #ctrl.SessionNumber = SessionNumber
 
             RegistrationEnabled=form.cleaned_data['RegistrationEnabled']
             EveryoneCanSee=form.cleaned_data['EveryoneCanSee']
