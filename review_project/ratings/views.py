@@ -122,7 +122,7 @@ class SudoView(View):
         logged_in=True
         try :
             ctrl = (models.Control.objects.all().order_by('-updated_at'))[0]
-            registration=ctrl.Regis trationEnabled
+            registration=ctrl.RegistrationEnabled
         except :
             ctrl = models.Control()
 
