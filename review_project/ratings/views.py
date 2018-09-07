@@ -72,26 +72,17 @@ class LeaderBoardView(View):
 class RegisterView(View):
     form_class_profile = forms.ProfileForm
     template_name = 'registration/login.html'
+    logged_in = False
 
     def get(self,request):
-        logged_in = False
-        try :
-            trial = (models.Control.objects.all().order_by('-updated_at'))[0]
-            registration = trial.RegistrationEnabled
-        except:
-            # If not found allow registration as object likley not created
-            registration = True
-        
-        if registration:
-            form_profile = self.form_class_profile(None)
-        else:
-            form_profile = None
+        # Assume the control object is available
+        ctrl_latest = models.Control.objects.latest('updated_at')
+        # Don't send a form profie if registration is disabled
+        form_profile = ctrl_latest.registration_enabled ? self.form_class_profile(None) : None 
 
-        return render(request, self.template_name, {'form':form_profile,"type":"Register",'logged_in':logged_in,'registration':registration})
+        return render(request, self.template_name, {'form':form_profile, "type":"Register", 'logged_in':self.logged_in, 'registration':registration})
 
     def post(self,request):
-        logged_in = False
-        print ("Received Post Request")
         form_profile = self.form_class_profile(request.POST)
 
         if form_profile.is_valid():
@@ -101,12 +92,10 @@ class RegisterView(View):
             user.save()
             raw_password = form_profile.cleaned_data.get('password1')
             user = authenticate(username=user.username, password=raw_password)
-            print (user.username)
             login(request, user)
-            print ("Logged in")
             return redirect('ratings:index')
         else:
-            return render(request, self.template_name, {'form':form_profile,"type":"Register",'logged_in':logged_in})
+            return render(request, self.template_name, {'form':form_profile,"type":"Register",'logged_in':self.logged_in})
 
 class UserUpdate(generic.UpdateView):
     model = models.Profile
@@ -125,7 +114,7 @@ class SudoView(View):
             registration = ctrl.RegistrationEnabled
         except :
             ctrl = models.Control()
-
+            registration = True
         form = self.form_class(instance=ctrl)
 
         return render(request, self.template_name, {'registration':registration,'logged_in':logged_in,'form':form, 'type':"Sudo"})
@@ -135,42 +124,29 @@ class SudoView(View):
         form = self.form_class(request.POST)
 
         if form.is_valid() :
-            SessionNumber=form.cleaned_data['SessionNumber']
+            SessionNumber = form.cleaned_data['SessionNumber']
             # commit = False ?
-            try:
-                ctrl = (models.Control.objects.all().order_by('-updated_at'))[0]
-                if ctrl.SessionNumber==SessionNumber: #Don't create new query object, instead change the current
-                    ctrl.RegistrationEnabled=form.cleaned_data['RegistrationEnabled']
-                    ctrl.EveryoneCanSee=form.cleaned_data['EveryoneCanSee']
-                    ctrl.EveryoneCanRate=form.cleaned_data['EveryoneCanRate']
-                    ctrl.EveryoneCanEdit=form.cleaned_data['EveryoneCanEdit']
-                    ctrl.UpdateEveryone=form.cleaned_data['UpdateEveryone']
-                else:
-                    RegistrationEnabled=form.cleaned_data['RegistrationEnabled']
-                    EveryoneCanSee=form.cleaned_data['EveryoneCanSee']
-                    EveryoneCanRate=form.cleaned_data['EveryoneCanRate']
-                    EveryoneCanEdit=form.cleaned_data['EveryoneCanEdit']
-                    UpdateEveryone=form.cleaned_data['UpdateEveryone']
-                    new_ctrl=models.Control(SessionNumber=SessionNumber,RegistrationEnabled=RegistrationEnabled,
-                    EveryoneCanSee=EveryoneCanSee,EveryoneCanEdit=EveryoneCanEdit,EveryoneCanRate=EveryoneCanRate,
-                    UpdateEveryone=UpdateEveryone)
-                    ctrl=new_ctrl
-            except:
-                RegistrationEnabled=form.cleaned_data['RegistrationEnabled']
-                EveryoneCanSee=form.cleaned_data['EveryoneCanSee']
-                EveryoneCanRate=form.cleaned_data['EveryoneCanRate']
-                EveryoneCanEdit=form.cleaned_data['EveryoneCanEdit']
-                UpdateEveryone=form.cleaned_data['UpdateEveryone']
-                new_ctrl=models.Control(SessionNumber=SessionNumber,RegistrationEnabled=RegistrationEnabled,
-                EveryoneCanSee=EveryoneCanSee,EveryoneCanEdit=EveryoneCanEdit,EveryoneCanRate=EveryoneCanRate,
-                UpdateEveryone=UpdateEveryone)
-                ctrl=new_ctrl
-            ctrl.updateOthers()
+
+            latest_ctrl = models.Control.objects.latest('updated_at')
+            
+            #if same SessionNumber,then delete current object and create new
+            if (latest_ctrl is not None) and (SessionNumber == latest_ctrl.session_number):
+                latest_ctrl.delete()
+
+            registration_enabled=form.cleaned_data['registration_enabled']
+            everyone_can_rate=form.cleaned_data['everyone_can_rate']
+            everyone_can_edit=form.cleaned_data['everyone_can_edit']
+            update_everyone=form.cleaned_data['update_everyone']
+
+            ctrl = models.Control(session_number=SessionNumber,registration_enabled=registration_enabled,
+            everyone_can_edit=everyone_can_edit,everyone_can_rate=everyone_can_rate,update_everyone=update_everyone)
+
             ctrl.save()
+            ctrl.updateOthers()
+
             # idk why but just do it
             return redirect(self.request.path_info)
         else :
-            # print (form)
             return render(request, self.template_name, {'logged_in':logged_in,'form':form, 'type':"Sudo", 'error_message': "Your Sudo form wasn't valid."})
 
 
@@ -348,96 +324,3 @@ class UserDetailView(generic.DetailView):
             return (user.userid==request.user.profile.userid)
         else:
             return False
-
-
-
-
-
-
-#  For Udit
-#  ---------------------------------Redundant Classes-------------------------------------
-# class LoginView(View):
-#     form_class = forms.LoginForm
-#     template_name = 'ratings/login.html'
-#     # Add user id to session variables
-#     def get(self,request):
-#         form = self.form_class(None)
-#         return render(request, self.template_name, {'form':form})
-# print("-----------------------------------------------------")
-# print (form) # this turned out to be null
-# # print (form.cleaned_data)
-# # print (form.cleaned_data['userid'])
-# # print (form.cleaned_data['password'])
-
-# if form.is_valid() :
-#     # form.save()
-#     uid = form.cleaned_data['userid']
-#     paswd = form.cleaned_data['password']
-#     try:
-#         uobj = models.User.objects.get(userid=uid)
-#         if(uobj):
-#             if(uobj.password == paswd) :
-#                 request.session['user_id'] = form.cleaned_data['userid']
-#                 return redirect('ratings:index')
-#             else :
-#                 return render(request, self.template_name, {'form': form ,'error_message': "Password doesn't match","type":"Login"})
-#         else :
-#             return render(request, self.template_name, {'form': form ,'error_message': "User doesn't exist.","type":"Login"})
-#     except ObjectDoesNotExist :
-#         return render(request, self.template_name, { 'form': form ,'error_message': "User ID doesn't exist.","type":"Login"})
-
-#     return redirect('ratings:index')
-# else :
-#     print("-----------------------------------------------------")
-#     print (form)
-#     # print (request.session['user_id'])
-#     return redirect('ratings:login')
-
-# class LogoutView(View):
-#     def get(self, request):
-#         try:
-#             if request.session['user_id']:
-#                 del request.session['user_id']
-#         except Exception:
-#             pass
-#         return redirect('ratings:login')
-
-# class RegisterView(View):
-#     form_class = forms.UserForm
-#     template_name = 'ratings/login.html'
-#     # Add user id to session variables
-#     def get(self,request):
-#         form = self.form_class(None)
-#         return render(request, self.template_name, {'form':form,'type':"Register"})
-
-#     def post(self,request):
-#         form = self.form_class(request.POST)
-
-#         if form.is_valid() :
-#             # form.save()
-#             fd = form.cleaned_data
-#             uobj = models.User(name=fd['name'],userid=fd['userid'],about=fd['about'],
-#                                 password=fd['password'],canSee=False,canRate=True)
-#             uobj.save()
-#             request.session['user_id'] = fd['userid']
-#             return redirect('ratings:index')
-#         else :
-#             return redirect('ratings:register')
-
-#     def post(self,request):
-#         username = request.POST['username']
-#         password = request.POST['password']
-#         print (username)
-#         print (password)
-#         user = User.objects.filter(username=request.POST['username'],password=request.POST['password'])
-#         if (user is not None):
-#             login(request,user)
-#             return redirect('ratings:index')
-#         else:
-#             print ("User is not found")
-#             return redirect('ratings:login')
-
-# class LogoutView(View):
-#     def get(self, request):
-#         logout(request)
-#         return redirect('ratings:user_list')
