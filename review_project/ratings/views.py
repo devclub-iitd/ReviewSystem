@@ -106,10 +106,11 @@ class UserUpdate(generic.UpdateView):
 class SudoView(View):
     form_class = forms.SudoForm
     template_name = 'registration/login.html'
+    logged_in = True
+
     # Add user id to session variables
     @method_decorator(user_passes_test(lambda u: u.is_superuser,login_url='/login/'))
     def get(self, request):
-        logged_in = True
         try :
             ctrl = (models.Control.objects.all().order_by('-updated_at'))[0]
             registration = ctrl.RegistrationEnabled
@@ -118,9 +119,9 @@ class SudoView(View):
             registration = True
         form = self.form_class(instance=ctrl)
 
-        return render(request, self.template_name, {'registration':registration,'logged_in':logged_in,'form':form, 'type':"Sudo"})
+        return render(request, self.template_name, {'registration':registration, 'logged_in':self.logged_in, 'form':form, 'type':"Sudo"})
 
-    @method_decorator(user_passes_test(lambda u: u.is_superuser,login_url='/login/'))
+    @method_decorator(user_passes_test(lambda u: u.is_superuser, login_url='/login/'))
     def post(self,request):
         form = self.form_class(request.POST)
 
@@ -134,13 +135,13 @@ class SudoView(View):
             if (latest_ctrl is not None) and (SessionNumber == latest_ctrl.session_number):
                 latest_ctrl.delete()
 
-            registration_enabled=form.cleaned_data['registration_enabled']
-            everyone_can_rate=form.cleaned_data['everyone_can_rate']
-            everyone_can_edit=form.cleaned_data['everyone_can_edit']
-            update_everyone=form.cleaned_data['update_everyone']
+            registration_enabled = form.cleaned_data['registration_enabled']
+            everyone_can_rate = form.cleaned_data['everyone_can_rate']
+            everyone_can_edit = form.cleaned_data['everyone_can_edit']
+            update_everyone = form.cleaned_data['update_everyone']
 
-            ctrl = models.Control(session_number=SessionNumber,registration_enabled=registration_enabled,
-            everyone_can_edit=everyone_can_edit,everyone_can_rate=everyone_can_rate,update_everyone=update_everyone)
+            ctrl = models.Control(session_number=SessionNumber, registration_enabled=registration_enabled,
+            everyone_can_edit=everyone_can_edit, everyone_can_rate=everyone_can_rate, update_everyone=update_everyone)
 
             ctrl.save()
             ctrl.updateOthers()
@@ -148,7 +149,7 @@ class SudoView(View):
             # idk why but just do it
             return redirect(self.request.path_info)
         else :
-            return render(request, self.template_name, {'logged_in':logged_in,'form':form, 'type':"Sudo", 'error_message': "Your Sudo form wasn't valid."})
+            return render(request, self.template_name, {'logged_in':self.logged_in, 'form':form, 'type':"Sudo", 'error_message': "Your Sudo form wasn't valid."})
 
 
 class UserDetailView(generic.DetailView):
