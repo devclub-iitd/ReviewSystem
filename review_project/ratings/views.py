@@ -48,8 +48,8 @@ class LeaderBoardView(View):
         for i in object_list:
             latest_work = i.get_latest_work()
             try:
-                if len(latest_work)>20:
-                    loshortworks.append(latest_work[:20])
+                if len(latest_work)>40:
+                    loshortworks.append(latest_work[:40])
                 else:
                     loshortworks.append(None)
             except:
@@ -73,10 +73,15 @@ class RegisterView(View):
     form_class_profile = forms.ProfileForm
     template_name = 'registration/login.html'
 
-    def get(self, request):
-        logged_in = False
-        trial = (models.Control.objects.all().order_by('-updated_at'))[0]
-        registration = trial.RegistrationEnabled
+    def get(self,request):
+        logged_in =False
+        try :
+            trial = (models.Control.objects.all().order_by('-updated_at'))[0]
+            registration = trial.RegistrationEnabled
+        except:
+            # If not found allow registration as object likley not created
+            registration = True
+        
         if registration:
             form_profile = self.form_class_profile(None)
         else:
