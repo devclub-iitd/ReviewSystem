@@ -72,26 +72,17 @@ class LeaderBoardView(View):
 class RegisterView(View):
     form_class_profile = forms.ProfileForm
     template_name = 'registration/login.html'
+    logged_in = False
 
     def get(self,request):
-        logged_in=False
-        try :
-            trial= (models.Control.objects.all().order_by('-updated_at'))[0]
-            registration=trial.RegistrationEnabled
-        except:
-            # If not found allow registration as object likley not created
-            registration = True
+        # Assume the control object is available
+        ctrl_latest = models.Control.objects.latest('updated_at')
+        # Don't send a form profie if registration is disabled
+        form_profile = ctrl_latest.registration_enabled ? self.form_class_profile(None) : None 
 
-        if registration:
-            form_profile = self.form_class_profile(None)
-        else:
-            form_profile=None
-
-        return render(request, self.template_name, {'form':form_profile,"type":"Register",'logged_in':logged_in,'registration':registration})
+        return render(request, self.template_name, {'form':form_profile, "type":"Register", 'logged_in':self.logged_in, 'registration':registration})
 
     def post(self,request):
-        logged_in=False
-        print ("Received Post Request")
         form_profile = self.form_class_profile(request.POST)
 
         if form_profile.is_valid():
@@ -101,12 +92,10 @@ class RegisterView(View):
             user.save()
             raw_password = form_profile.cleaned_data.get('password1')
             user = authenticate(username=user.username, password=raw_password)
-            print (user.username)
             login(request, user)
-            print ("Logged in")
             return redirect('ratings:index')
         else:
-            return render(request, self.template_name, {'form':form_profile,"type":"Register",'logged_in':logged_in})
+            return render(request, self.template_name, {'form':form_profile,"type":"Register",'logged_in':self.logged_in})
 
 class UserUpdate(generic.UpdateView):
     model = models.Profile
