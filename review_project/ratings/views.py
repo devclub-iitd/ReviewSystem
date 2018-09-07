@@ -74,7 +74,7 @@ class RegisterView(View):
     template_name = 'registration/login.html'
 
     def get(self,request):
-        logged_in =False
+        logged_in = False
         try :
             trial = (models.Control.objects.all().order_by('-updated_at'))[0]
             registration = trial.RegistrationEnabled
@@ -90,7 +90,7 @@ class RegisterView(View):
         return render(request, self.template_name, {'form':form_profile,"type":"Register",'logged_in':logged_in,'registration':registration})
 
     def post(self,request):
-        logged_in=False
+        logged_in = False
         print ("Received Post Request")
         form_profile = self.form_class_profile(request.POST)
 
@@ -180,6 +180,7 @@ class UserDetailView(generic.DetailView):
     form_class_update = forms.UserUpdateForm
     template_name = 'ratings/user.html'
 
+    @method_decorator(login_required)
     def get(self, request, **kwargs):
         logged_in = True
 
@@ -200,105 +201,60 @@ class UserDetailView(generic.DetailView):
             raterid = request.user.profile.userid
             ratingFound = False
             try:
-                user = models.Profile.objects.get(userid=uid)
-                target_user = models.User.objects.get(username=uid)
-                full_name = target_user.first_name + " " + target_user.last_name
+                user_profile = models.Profile.objects.get(userid=uid)
+                user = models.User.objects.get(username=uid)
+                full_name = user.first_name + " " + user.last_name
             except ObjectDoesNotExist:
+                # Invalid username in get request
                 return render(request, error_template, {'error': "The User with User Id : "+ uid +" does not exist."})
 
             try:
-                ratings = models.Rating.objects.all().filter(user1=raterid).filter(user2=user).order_by('-updated_at')
-                reviews=decrypt(ratings,'review')
-                ratings = decrypt(ratings,'rating')
-            except ObjectDoesNotExist:
-                current_rating = "Not yet rated by you. Rating Object after these filters doesn't exist."
-            
-            try:
-                current_rating = ratings[0]
-                current_review = reviews[0]
-                ratingFound = True
-            except:
-                current_rating = "Not yet reviewed by you."
-                current_review = "Not yet reviewed by you"
-            
-            try:
-                works_together = []
-                works = models.Work.objects.all().filter(user=user).order_by('-updated_at') #.values('work')
-                works=decrypt(works) # Works now consist of a list of decrypted works
-            except :
-                works = None
-            
-            for t in range(len(works)): # starting part of the works will be grouped together into a new list of dictionaries
-                j=works[t].split()
-                '''
-                if len(j)>5:
-                    start=""
-                    for m in range(4):
-                        start+=j[m]+" "
-                    start=start.rstrip(" ")
-                    start+="..."
+                ratings = models.Rating.objects.all().filter(user1=raterid).filter(user2=user_profile).order_by('-updated_at')[:1]
+                curr_control = models.Control.objects.latest('-updated_at')
+                if curr_control.session_number == ratings.session_number:
+                    current_review = decrypt(ratings, 'review')[0]
+                    current_rating = decrypt(ratings, 'rating')[0]
+                    ratingFound = True
                 else:
-                '''
-                start = works[t]
-                works_together.append({'start':start,'work':works[t]})
-            rater = models.Profile.objects.get(userid = raterid)
-            if rater.canRate :
-                form = self.form_class(None)
-            else  :
-                form = None
-            # Get User Update Forms
-            if raterid == uid : #If on your own profile
-                form_work = self.form_class_work(None)
-                form_update = self.form_class_update(initial={'about':rater.about})
-            else :
-                form_work = None
-                form_update = None
+                    raise Exception
+            except:
+                # Either first time rate or no rating in present session
+                current_rating = "Not yet reviewed by you."
+                current_review = "Not yet reviewed by you."
 
-            ratingFound = False if (uid == raterid) else ratingFound  #If on your own profile
-            current = True if (uid == raterid) else False   #If on your own profile
-            together = []
+            try:
+                works = models.Work.objects.all().filter(user=user_profile).order_by('-updated_at') #.values('work')
+                decrypted_works = decrypt(works) # Works now consist of a list of decrypted works
+            except:
+                decrypted_works = None
+
+            rater = models.Profile.objects.get(userid=raterid)
+            if rater.can_rate:
+                form = self.form_class(None)
+            else:
+                form = None
+
+            # Get User Update Forms
+            form_work = self.form_class_work(None) if (uid == raterid) else None
+            form_update = self.form_class_update(initial={'about':rater.about}) if (uid == raterid) else None
+            ratingFound = False if (uid == raterid) else ratingFound
+            current = True if (uid == raterid) else False   # If on your own profile
+
+            all_ratings = []
             if(current):
                 curr_ratings = models.Rating.objects.filter(user2=rater).order_by('-updated_at')
                 try:
-                    reviews = decrypt(curr_ratings,'review')
-                    ratings = decrypt(curr_ratings,'rating')
+                    reviews = decrypt(curr_ratings, 'review')
+                    ratings = decrypt(curr_ratings, 'rating')
+                    for j in range(len(reviews)):
+                        all_ratings.append({'rating':ratings[j], 'review':reviews[j]})
                 except:
-                    reviews=None
-                    ratings=None
-                for j in range(len(reviews)):
-                    together.append({'rating':ratings[j],'review':reviews[j]})
-
-            return render(request, self.template_name, {'logged_in':logged_in,'works_together':works_together, 'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'together':together, 'rater':rater,'current_review':current_review})
-
+                    reviews = None
+                    ratings = None
+            return render(request, self.template_name, {'logged_in':True, 'works_together':decrypted_works, 'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'together':together, 'rater':rater,'current_review':current_review})
         else:
-            try :
-                user = models.Profile.objects.get(userid=uid)
-                target_user = models.User.objects.get(username=uid)
-                full_name = target_user.first_name + " " + target_user.last_name
-            except ObjectDoesNotExist :
-                return render(request, error_template ,{'error': "The User with User Id : "+ uid +" does not exist."})
-            try :
-                works_together=[]
-                works = models.Work.objects.all().filter(user=user).order_by('-updated_at')#.values('work')
-                works = decrypt(works)
+            return render(request, error_template, {'error': "No such user exists. Please validate your request."})
 
-            except :
-                works = None
-            for t in range(len(works)): # starting part of the works will be grouped togetheer into a new list of dictionaries
-                j=works[t].split()
-                '''
-                if len(j)>5:
-                    start=""
-                    for m in range(4):
-                        start+=j[m]+" "
-                    start=start.rstrip(" ")
-                    start+="..."
-                else:
-                '''
-                start=works[t]
-                works_together.append({'start':start,'work':works[t]})
-
-            return render(request, self.template_name, {'logged_in':logged_in,'works_together':works_together, 'user':user, 'name':full_name, 'current':False, 'works':works})#,'decryptworks':decryptworks})
 
     def post(self, request, **kwargs):
         form = self.form_class(request.POST)
