@@ -125,7 +125,7 @@ class SudoView(View):
         form = self.form_class(request.POST)
 
         if form.is_valid() :
-            SessionNumber = form.cleaned_data['SessionNumber']
+            SessionNumber = form.cleaned_data['session_number']
             # commit = False ?
 
             latest_ctrl = models.Control.objects.latest('updated_at')
