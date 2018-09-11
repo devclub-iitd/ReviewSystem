@@ -189,14 +189,14 @@ class UserDetailView(generic.DetailView):
                 ratings = models.Rating.objects.all().filter(user1=raterid).filter(user2=user_profile).order_by('-updated_at')
                 curr_control = models.Control.objects.latest('updated_at')
                 robj = ratings[0]
-                print(str(curr_control.session_number) + " " + str(robj.session_number))
+                # print(str(curr_control.session_number) + " " + str(robj.session_number)) # Debug
                 if curr_control.session_number == robj.session_number:
                     current_review = decrypt(ratings, 'review')[0]
                     current_rating = decrypt(ratings, 'rating')[0]
                 else:
                     raise Exception
             except:
-                print("Either first time rate or no rating in present session")
+                # print("Either first time rate or no rating in present session") # Debug
                 current_rating = "Not yet reviewed by you."
                 current_review = "Not yet reviewed by you."
 
@@ -255,8 +255,8 @@ class UserDetailView(generic.DetailView):
                 encryptedrating = signing.dumps((rating,))
                 encryptedreview = signing.dumps((review,))
                 rater = models.Profile.objects.get(userid=request.user.profile.userid)
-                print(rater)
-                print(target)
+                # print(rater) # Debug
+                # print(target) # Debug
                 if kwargs['uid'] == None:
                     err = "Invalid User"
                 elif kwargs['uid'] == request.user.profile.userid:
@@ -264,20 +264,20 @@ class UserDetailView(generic.DetailView):
                 else:
                     editRating, newRating = True, True
                     curr_session = models.Control.objects.latest('updated_at')
-                    print("Current session number: " + str(curr_session.session_number))
+                    # print("Current session number: " + str(curr_session.session_number)) # Debug
                     try:
                         robj = models.Rating.objects.all().filter(user1=rater).filter(user2=target).order_by('-updated_at')[0]
-                        print(robj)
-                        print(curr_session.session_number)
+                        # print(robj) # Debug
+                        # print(curr_session.session_number) # Debug
                         if curr_session.session_number == robj.session_number:
                             newRating = False
                         if (curr_session.session_number == robj.session_number) and (not robj.can_edit):
                             editRating = False
                     except:
-                        print("Could not find rating object")
+                        # print("Could not find rating object") # Debug
                         editRating = False
                     
-                    print(str(newRating) + " " + str(editRating))
+                    # print(str(newRating) + " " + str(editRating)) # Debug
                     # Update rating object
                     if newRating:
                         robj = models.Rating(user1=rater, user2=target, rating=encryptedrating, review=encryptedreview, 
