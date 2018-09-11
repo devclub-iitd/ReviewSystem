@@ -191,8 +191,8 @@ class UserDetailView(generic.DetailView):
                 robj = ratings[0]
                 print(str(curr_control.session_number) + " " + str(robj.session_number))
                 if curr_control.session_number == robj.session_number:
+                    current_rating = signing.loads(decrypt(ratings, 'rating')[0])[0]
                     current_review = decrypt(ratings, 'review')[0]
-                    current_rating = decrypt(ratings, 'rating')[0]
                 else:
                     raise Exception
             except:
@@ -224,12 +224,13 @@ class UserDetailView(generic.DetailView):
                     reviews = decrypt(curr_ratings, 'review')
                     ratings = decrypt(curr_ratings, 'rating')
                     for j in range(len(reviews)):
-                        all_ratings.append({'rating':ratings[j], 'review':reviews[j]})
+                        curr = signing.loads(ratings[j])[0]
+                        all_ratings.append({'rating':curr, 'review':reviews[j]})
                 except:
                     reviews = None
                     ratings = None
 
-            return render(request, self.template_name, {'logged_in':True, 'works_together':decrypted_works, 'user':user_profile, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'form':form, 'workform':form_work, 'updateform':form_update, 'together':all_ratings, 'rater':rater,'current_review':current_review})
+            return render(request, self.template_name, {'logged_in':True, 'works_together':decrypted_works, 'user':user_profile, 'name':full_name, 'current':current, 'current_rated':current_rating, 'form':form, 'workform':form_work, 'updateform':form_update, 'together':all_ratings, 'rater':rater,'current_review':current_review})
         else:
             return render(request, error_template, {'error': "No such user exists. Please validate your request."})
 
@@ -280,7 +281,7 @@ class UserDetailView(generic.DetailView):
                     print(str(newRating) + " " + str(editRating))
                     # Update rating object
                     if newRating:
-                        robj = models.Rating(user1=rater, user2=target, rating=encryptedrating, review=encryptedreview, 
+                        robj = models.Rating(user1=rater, user2=target, rating=encryptedrating, review=encryptedreview,
                                             can_edit=True, session_number=curr_session.session_number)
                     elif editRating:
                         robj.rating = encryptedrating

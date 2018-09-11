@@ -43,8 +43,8 @@ class Profile(models.Model):
         for rating in ratings_list :
             #decrypt it here
             encrypted_rating = rating.rating
-            decrypted_rating = signing.loads(encrypted_rating)
-            rate = decrypted_rating[0]
+            decrypted_rating = signing.loads(signing.loads(encrypted_rating)[0])[0]
+            rate = (decrypted_rating)
             #cumulative_rating += r.rating
             cumulative_rating += rate
             total_num_ratings += 1
@@ -53,20 +53,17 @@ class Profile(models.Model):
                 current_rating += rate
                 recent_ratings += 1
 
-        
-        #  if Divide by zero because of no ratings 
+        #  if Divide by zero because of no ratings
         total_num_ratings = total_num_ratings if (total_num_ratings > 0 ) else 1
-        recent_ratings    = recent_ratings if (recent_ratings > 0 ) else 1 
-
+        recent_ratings    = recent_ratings if (recent_ratings > 0 ) else 1
         self.current_rating   = (current_rating / recent_ratings )
         self.cumulated_rating = (cumulative_rating / total_num_ratings )
 
         num_current_rated = Rating.objects.all().filter(user1 = self.userid).filter(session_number = recent_session_number).count()
         num_users = User.objects.all().exclude(is_superuser=True).count()
-        
+
         # person has rated less than threshold then don't allow to see
-        self.can_see = False if ( num_current_rated < threshold ) else True 
-        
+        self.can_see = False if ( num_current_rated < threshold ) else True
         self.save()
 
     def get_absolute_url(self):
@@ -100,7 +97,7 @@ class Profile(models.Model):
 class Rating(models.Model):
     # Session number for versioning
     session_number = models.IntegerField(default=0)
-    
+
     # user1 rating to user2
     user1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='Profile1')
     user2 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='Profile2')
@@ -109,7 +106,7 @@ class Rating(models.Model):
     rating = models.CharField(max_length=100)
     review = models.CharField(max_length=1024)
 
-    can_edit = models.BooleanField() # Is the rating editable 
+    can_edit = models.BooleanField() # Is the rating editable
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -132,7 +129,7 @@ class Control(models.Model):
     session_number = models.IntegerField(default=0)
     registration_enabled = models.BooleanField(default=True)
     everyone_can_rate = models.BooleanField(default=True)
-    everyone_can_edit = models.BooleanField(default=True) # doesn't overwrite 
+    everyone_can_edit = models.BooleanField(default=True) # doesn't overwrite
     update_everyone  = models.BooleanField(default=True)
 
     threshold_persons = models.PositiveIntegerField(default=0)

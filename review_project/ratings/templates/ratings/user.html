@@ -61,7 +61,7 @@
         <div class="container" style="margin-left:20px;">
             <table class="table">
             <tbody>
-                    {% for work in works %}
+                    {% for work in works_together %}
                         <tr><div class="card work-card">{{ work }}</div></tr>
                     {% endfor %}
             </tbody>
@@ -123,16 +123,16 @@
         </table>
         {% endif %}
     </div>
-    
+
     {% if current %}
     <div class="padding-15 edit-form">
         {% if workform and updateform %}
         <div class="row">
             <div class="col-sm-12 row">
-              {%if works%}
+              {%if works_together%}
                 <span class="font-lora col-sm-3">Works:</span>
                 <div class="col-sm-9">
-                        {% for work in works %}
+                        {% for work in works_together %}
                             <div class="card work-card">{{ work }}</div>
                         {% endfor %}
                         <!--{% for t in works_together %}
