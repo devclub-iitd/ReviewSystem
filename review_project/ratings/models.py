@@ -6,18 +6,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core import signing
 import datetime
 
-def decrypt(encryptedqueryset,string='work'):
-    dictionary=encryptedqueryset.values(string)
-    trueworks=[]
-    for i in dictionary:
-        m=i.get(string)
-        trueworks.append(m)
-    decryptworks=[]
-    for i in trueworks:
-        n=signing.loads(i)
-        decryptworks.append(n[0])
-    return decryptworks
-
 class Profile(models.Model):
     userid = models.CharField(primary_key=True,unique=True,max_length=6,default='')
     user = models.OneToOneField(User, on_delete=models.CASCADE)

@@ -186,15 +186,17 @@ class UserDetailView(generic.DetailView):
                 return render(request, error_template, {'error': "The User with User Id : "+ uid +" does not exist."})
 
             try:
-                ratings = models.Rating.objects.all().filter(user1=raterid).filter(user2=user_profile).latest('updated_at')
+                ratings = models.Rating.objects.all().filter(user1=raterid).filter(user2=user_profile).order_by('-updated_at')
                 curr_control = models.Control.objects.latest('updated_at')
-                if curr_control.session_number == ratings.session_number:
+                robj = ratings[0]
+                print(str(curr_control.session_number) + " " + str(robj.session_number))
+                if curr_control.session_number == robj.session_number:
                     current_review = decrypt(ratings, 'review')[0]
                     current_rating = decrypt(ratings, 'rating')[0]
                 else:
                     raise Exception
             except:
-                # Either first time rate or no rating in present session
+                print("Either first time rate or no rating in present session")
                 current_rating = "Not yet reviewed by you."
                 current_review = "Not yet reviewed by you."
 
@@ -250,31 +252,40 @@ class UserDetailView(generic.DetailView):
             if form.is_valid():
                 rating = form.cleaned_data['rating']
                 review = form.cleaned_data['review']
+                encryptedrating = signing.dumps((rating,))
                 encryptedreview = signing.dumps((review,))
                 rater = models.Profile.objects.get(userid=request.user.profile.userid)
+                print(rater)
+                print(target)
                 if kwargs['uid'] == None:
                     err = "Invalid User"
                 elif kwargs['uid'] == request.user.profile.userid:
                     err = "You cannot rate yourself."
                 else:
                     editRating, newRating = True, True
+                    curr_session = models.Control.objects.latest('updated_at')
+                    print("Current session number: " + str(curr_session.session_number))
                     try:
                         robj = models.Rating.objects.all().filter(user1=rater).filter(user2=target).order_by('-updated_at')[0]
-                        curr_session = models.Control.objects.latest('updated_at')
-                        if curr_session.session_number == ratings.session_number:
+                        print(robj)
+                        print(curr_session.session_number)
+                        if curr_session.session_number == robj.session_number:
                             newRating = False
-                        if (curr_session.session_number == ratings.session_number) and (not robj.can_edit):
+                        if (curr_session.session_number == robj.session_number) and (not robj.can_edit):
                             editRating = False
-                        # Update rating object
-                        if newRating:
-                            robj = models.Rating(user1=rater, user2=target, rating=rating, review=encryptedreview, 
-                                                can_edit=True, session_number=curr_session.session_number)
-                        elif editRating:
-                            robj.rating = rnum
-                            robj.review = encryptedreview
-                        robj.save()
                     except:
+                        print("Could not find rating object")
                         editRating = False
+                    
+                    print(str(newRating) + " " + str(editRating))
+                    # Update rating object
+                    if newRating:
+                        robj = models.Rating(user1=rater, user2=target, rating=encryptedrating, review=encryptedreview, 
+                                            can_edit=True, session_number=curr_session.session_number)
+                    elif editRating:
+                        robj.rating = encryptedrating
+                        robj.review = encryptedreview
+                    robj.save()
                     return redirect(self.request.path_info)
                 return render(request, self.template_name, {'error_message': err, 'form':form, 'user':target, 'name':full_name})
 
