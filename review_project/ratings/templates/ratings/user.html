@@ -14,18 +14,6 @@
         <a href="#" class="exit"><img src="{% static 'ratings/images/exit.png' %}" width="20" height="20"></a>
     {% endif %}
     <div class="padding-15 no-edit">
-        <!-- <div class="row">
-            <div class="col-sm-12 row">
-                <span class="font-lora col-sm-3">User Name:</span>
-                <div class="col-sm-9">{{ name }}</div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-12 row">
-                <span class="font-lora col-sm-3">User Id:</span>
-                <div class="col-sm-9">{{ user.userid }}</div>
-            </div>
-        </div> -->
         <div class="row">
             <div class="col-sm-12 row">
                 <span class="font-lora col-sm-3">About:</span>
@@ -49,21 +37,20 @@
         </div>
         {% endif %}
 
-        {% if ratingFound %}
-            <div class="row">
+        {% if not current %}
+        <div class="row">
+            <div class="col-sm-12 row">
+                <span class="font-lora col-sm-3">Current Rating by You:</span>
+                <div class="col-sm-9">{{ current_rated }}</div>
+            </div>
+        </div>
+
+        <div class="row">
                 <div class="col-sm-12 row">
-                    <span class="font-lora col-sm-3">Current Rating by You:</span>
-                    <div class="col-sm-9">{{ current_rated }}</div>
+                    <span class="font-lora col-sm-3">Current Review by You:</span>
+                    <div class="col-sm-9">{{ current_review }}</div>
                 </div>
-            </div>
-
-            <div class="row">
-                    <div class="col-sm-12 row">
-                        <span class="font-lora col-sm-3">Current Review by You:</span>
-                        <div class="col-sm-9">{{ current_review }}</div>
-                    </div>
-            </div>
-
+        </div>
         {% endif %}
 
         <div class="row">
@@ -136,6 +123,7 @@
         </table>
         {% endif %}
     </div>
+    
     {% if current %}
     <div class="padding-15 edit-form">
         {% if workform and updateform %}

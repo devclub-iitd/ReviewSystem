@@ -37,8 +37,6 @@ class Profile(models.Model):
 
 
     def updateMyRating(self):
-        # tnow = datetime.datetime.now()
-
         # A control object must be present
         recent_control = (Control.objects.latest('updated_at'))
         recent_session_number = recent_control.session_number
@@ -118,14 +116,11 @@ class Rating(models.Model):
     # user1 rating to user2
     user1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='Profile1')
     user2 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='Profile2')
-    
-    # Integer field before
-    #rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
-    
+
     # Changed because now encrypted char field
     rating = models.CharField(max_length=100)
     review = models.CharField(max_length=1024)
-    
+
     can_edit = models.BooleanField() # Is the rating editable 
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -162,13 +157,13 @@ class Control(models.Model):
         for user in  userlist:
             user.can_rate = self.everyone_can_rate
             user.save()
-            if self.update_everyone :
+            if self.update_everyone:
                 user.updateMyRating()
 
         ratings = Rating.objects.all().filter(session_number = self.session_number)
 
         # For current batch of ratings, make them editable or un-editable
-        for rating in ratings :
+        for rating in ratings:
             rating.can_edit = self.everyone_can_edit
             rating.save()
 
