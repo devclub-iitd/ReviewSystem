@@ -158,10 +158,10 @@
             {%for each in works_together%}
             <div class="row" style="margin:10px 0px 15px 0px; border-bottom: 1px solid rgb(212, 212, 212)">
                 <div class="col-sm-9"  style="max-height: 72px; overflow:auto;">
-                    {{each.start}}
+                    {{each}}
                 </div>
                 <div class="col-sm-3" style="margin-top:8px">
-                    <input type="checkbox" name="working[]" value='{{each.work}}'>
+                    <input type="checkbox" name="working[]" value='{{each}}'>
                 </div>
             </div>
             {%endfor%}
