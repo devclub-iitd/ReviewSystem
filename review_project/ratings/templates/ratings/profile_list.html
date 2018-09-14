@@ -20,12 +20,15 @@
             {%if ctr.profile.user.is_superuser%}
             {%else%}
             <tr>
-                <th scope="col"> <a href="{{ ctr.profile.get_absolute_url }}">
-                    <strong>{{ ctr.profile.userid }}</strong>
-                </a></th>
+                 <th scope="col">
+                    <a href="{{ ctr.profile.get_absolute_url }}">
+                     <strong {%if ctr.unrated%}   class="flash" {%endif%} style="color: green;" >
+                         {{ ctr.profile.userid }}
+                        </strong> 
+                </a>  </th> 
                 <td >
                         {% if ratercansee %}
-                        <strong>{{ ctr.profile.current_rating }}</strong>
+                        <strong>{{ ctr.profile.current_rating | floatformat:2 }}</strong> 
                         {% else %}
                         <strong>Rate everyone to see ratings.</strong>
                         {% endif %}
@@ -48,4 +51,5 @@
         </tbody>
     </table>
 </div>
+
 {% endblock %}
