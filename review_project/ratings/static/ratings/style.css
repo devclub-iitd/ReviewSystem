@@ -103,3 +103,17 @@ body{
 .leader-row {
     border-top: 2px solid #777777;
 }
+
+.flash {
+    animation-name: flash;
+    animation-duration: 0.4s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    animation-play-state: running;
+}
+
+@keyframes flash {
+    from {color: red;}
+    to {color: black;}
+}

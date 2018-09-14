@@ -35,8 +35,13 @@ $ mkdir ratings/migrations
 $ touch ratings/migrations/__init__.py
 $ python manage.py makemigrations
 $ python manage.py migrate
+$ python manage.py createsuperuser
 $ python manage.py runserver
 ```
+
+Additionally, go to Django Admin (/admin) and create the first object of Ctrl type with the default parameters.
+
+Each time you want to begin a new session, make a new control object from SudoView (/sudo)  
 
 ## Features
 

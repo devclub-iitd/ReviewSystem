@@ -10,9 +10,9 @@
                 <!--<th scope="col" class="col-sm-3">User Id</th>
                 <th scope="col" class="col-sm-2">Rating</th>
                 <th scope="col" class="col-sm-7">Latest Work</th>-->
-                <th scope="col" style="width: 30%">User Id</th>
-                <th scope="col" style="width: 20%">Rating</th>
-                <th scope="col" style="width: 70%"><center>Latest Work</center></th>
+                <th scope="col" style="width: 25%"> User Id  </th>
+                <th scope="col" style="width: 15%"> Rating </th>
+                <th scope="col" style="width: 80%"> Latest Work</th>
             </tr>
         </thead>
         <tbody>
@@ -20,12 +20,17 @@
             {%if ctr.profile.user.is_superuser%}
             {%else%}
             <tr>
-                <th scope="col"> <a href="{{ ctr.profile.get_absolute_url }}">
-                    <strong>{{ ctr.profile.userid }}</strong>
-                </a></th>
-                <td >
+                <th scope="col">
+                    <a href="{{ ctr.profile.get_absolute_url }}"> 
+                        
+                        <strong {%if ctr.unrated%}   class="flash" {%endif%} style="color: green;" >
+                                {{ ctr.profile.userid }}
+                            </strong> 
+                        
+                </a>  </th> 
+                <td >   
                         {% if ratercansee %}
-                        <strong>{{ ctr.profile.current_rating }}</strong>
+                        <strong>{{ ctr.profile.current_rating | floatformat:2 }}</strong> 
                         {% else %}
                         <strong>Rate everyone to see ratings.</strong>
                         {% endif %}
@@ -48,4 +53,5 @@
         </tbody>
     </table>
 </div>
+
 {% endblock %}

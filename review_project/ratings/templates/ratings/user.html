@@ -25,7 +25,7 @@
         <div class="row">
             <div class="col-sm-12 row">
                 <span class="font-lora col-sm-3">Current Rating:</span>
-                <div class="col-sm-9">{{ user.current_rating }}</div>
+                <div class="col-sm-9">{{ user.current_rating | floatformat:2 }}</div>
             </div>
         </div>
         {% else %}
@@ -41,7 +41,11 @@
         <div class="row">
             <div class="col-sm-12 row">
                 <span class="font-lora col-sm-3">Current Rating by You:</span>
+<<<<<<< HEAD
                 <div class="col-sm-9">{{ current_rated }}</div>
+=======
+                <div class="col-sm-9">{{ current_rated | floatformat:2 }}</div>
+>>>>>>> bc3b83583b47cf88143be3a92f8010ff00881ad7
             </div>
         </div>
 
@@ -108,16 +112,16 @@
         <table class="table">
             <thead class="thead-light">
                 <tr>
-                    <!--<th scope="col" class="col-sm-3">Rating</th>
-                    <th scope="col" class="col-sm-9">Review</th>-->
-                    <th scope="col" style="width: 65%">Rating</th>
-                    <th scope="col" style="width: 35%"><center>Review</center></th>
+                    <!-- <th scope="col" class="col-sm-3">Rating</th>
+                    <th scope="col" class="col-sm-9">Review</th> -->
+                    <th scope="col" style="width: 20%">Rating</th>
+                    <th scope="col" style="width: 80%"><center>Review</center></th>
                 </tr>
             </thead>
             <tbody>
                 {% for i in together %}
                 <tr>
-                    <td > <strong>{{i.rating}}</strong> </td>
+                    <td > <strong>{{i.rating | floatformat:2}}</strong> </td>
                     <td > {{i.review}}</td>
                 </tr>
                 {% endfor %}
