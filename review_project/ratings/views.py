@@ -45,7 +45,12 @@ class LeaderBoardView(View):
         ratercansee = request.user.profile.can_see
         logged_in=True
         loshortworks=[]
+
+        curr_control = models.Control.objects.latest('updated_at')
+
         for i in object_list:
+            
+
             latest_work = i.get_latest_work()
             try:
                 if len(latest_work)>40:
@@ -59,10 +64,16 @@ class LeaderBoardView(View):
             if object_list[j].user.is_superuser:
                 continue
             else:
-                ele = {'profile':object_list[j],'short':loshortworks[j]}
+                robjs = models.Rating.objects.all().filter(session_number = curr_control.session_number).filter(user1=request.user.profile).filter(user2=object_list[j])
+                
+                rated = False if list(robjs) == [] else True 
+                if (request.user.profile == object_list[j]):
+                    rated = True 
+                ele = {'profile':object_list[j],'short':loshortworks[j], 'unrated':not rated}
                 dict.append(ele)
 
-        return render(request, self.template_name, {'dict':dict,'object_list':object_list,'ratercansee':ratercansee,'logged_in':logged_in,'loshortworks':loshortworks})
+
+        return render(request, self.template_name, {'dict':dict,'object_list':object_list,'ratercansee':ratercansee,'logged_in':logged_in,'loshortworks':loshortworks,})
 
     # def get_context_data(self, **kwargs):
     #     ctx = super(LeaderBoardView, self).get_context_data(**kwargs)
