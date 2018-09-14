@@ -25,7 +25,7 @@
         <div class="row">
             <div class="col-sm-12 row">
                 <span class="font-lora col-sm-3">Current Rating:</span>
-                <div class="col-sm-9">{{ user.current_rating }}</div>
+                <div class="col-sm-9">{{ user.current_rating | floatformat:2 }}</div>
             </div>
         </div>
         {% else %}
@@ -41,7 +41,7 @@
         <div class="row">
             <div class="col-sm-12 row">
                 <span class="font-lora col-sm-3">Current Rating by You:</span>
-                <div class="col-sm-9">{{ current_rated }}</div>
+                <div class="col-sm-9">{{ current_rated | floatformat:2 }}</div>
             </div>
         </div>
 
@@ -117,7 +117,7 @@
             <tbody>
                 {% for i in together %}
                 <tr>
-                    <td > <strong>{{i.rating}}</strong> </td>
+                    <td > <strong>{{i.rating | floatformat:2}}</strong> </td>
                     <td > {{i.review}}</td>
                 </tr>
                 {% endfor %}
