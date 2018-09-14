@@ -42,7 +42,7 @@ class LeaderBoardView(View):
         object_list = models.Profile.objects.all().order_by('-current_rating')
         #ln=0
         #lst=[]
-        ratercansee = request.user.profile.canSee
+        ratercansee = request.user.profile.can_see
         logged_in=True
         loshortworks=[]
         for i in object_list:
@@ -72,26 +72,18 @@ class LeaderBoardView(View):
 class RegisterView(View):
     form_class_profile = forms.ProfileForm
     template_name = 'registration/login.html'
+    logged_in = False
 
     def get(self,request):
-        logged_in=False
-        try :
-            trial= (models.Control.objects.all().order_by('-updated_at'))[0]
-            registration=trial.RegistrationEnabled
-        except:
-            # If not found allow registration as object likley not created
-            registration = True
-        
-        if registration:
-            form_profile = self.form_class_profile(None)
-        else:
-            form_profile=None
+        # Assume the control object is available
+        ctrl_latest = models.Control.objects.latest('updated_at')
+        # Don't send a form profie if registration is disabled
+        registration = ctrl_latest.registration_enabled
+        form_profile = self.form_class_profile(None) if registration else None
 
-        return render(request, self.template_name, {'form':form_profile,"type":"Register",'logged_in':logged_in,'registration':registration})
+        return render(request, self.template_name, {'form':form_profile, "type":"Register", 'logged_in':self.logged_in, 'registration':registration})
 
     def post(self,request):
-        logged_in=False
-        print ("Received Post Request")
         form_profile = self.form_class_profile(request.POST)
 
         if form_profile.is_valid():
@@ -101,77 +93,63 @@ class RegisterView(View):
             user.save()
             raw_password = form_profile.cleaned_data.get('password1')
             user = authenticate(username=user.username, password=raw_password)
-            print (user.username)
             login(request, user)
-            print ("Logged in")
             return redirect('ratings:index')
         else:
-            return render(request, self.template_name, {'form':form_profile,"type":"Register",'logged_in':logged_in})
+            return render(request, self.template_name, {'form':form_profile,"type":"Register",'logged_in':self.logged_in})
 
 class UserUpdate(generic.UpdateView):
     model = models.Profile
-    fields = ['name','about','updated_at','work']
+    fields = ['name', 'about', 'updated_at', 'work']
 
 ########################################## Do @ superuserloginrequired here ###################################
 class SudoView(View):
     form_class = forms.SudoForm
     template_name = 'registration/login.html'
+    logged_in = True
+
     # Add user id to session variables
     @method_decorator(user_passes_test(lambda u: u.is_superuser,login_url='/login/'))
-    def get(self,request):
-        logged_in=True
+    def get(self, request):
         try :
             ctrl = (models.Control.objects.all().order_by('-updated_at'))[0]
-            registration=ctrl.RegistrationEnabled
+            registration = ctrl.RegistrationEnabled
         except :
             ctrl = models.Control()
-
+            registration = True
         form = self.form_class(instance=ctrl)
 
-        return render(request, self.template_name, {'registration':registration,'logged_in':logged_in,'form':form, 'type':"Sudo"})
+        return render(request, self.template_name, {'registration':registration, 'logged_in':self.logged_in, 'form':form, 'type':"Sudo"})
 
-    @method_decorator(user_passes_test(lambda u: u.is_superuser,login_url='/login/'))
+    @method_decorator(user_passes_test(lambda u: u.is_superuser, login_url='/login/'))
     def post(self,request):
         form = self.form_class(request.POST)
 
         if form.is_valid() :
-            SessionNumber=form.cleaned_data['SessionNumber']
+            SessionNumber = form.cleaned_data['session_number']
             # commit = False ?
-            try:
-                ctrl = (models.Control.objects.all().order_by('-updated_at'))[0]
-                if ctrl.SessionNumber==SessionNumber: #Don't create new query object, instead change the current
-                    ctrl.RegistrationEnabled=form.cleaned_data['RegistrationEnabled']
-                    ctrl.EveryoneCanSee=form.cleaned_data['EveryoneCanSee']
-                    ctrl.EveryoneCanRate=form.cleaned_data['EveryoneCanRate']
-                    ctrl.EveryoneCanEdit=form.cleaned_data['EveryoneCanEdit']
-                    ctrl.UpdateEveryone=form.cleaned_data['UpdateEveryone']
-                else:
-                    RegistrationEnabled=form.cleaned_data['RegistrationEnabled']
-                    EveryoneCanSee=form.cleaned_data['EveryoneCanSee']
-                    EveryoneCanRate=form.cleaned_data['EveryoneCanRate']
-                    EveryoneCanEdit=form.cleaned_data['EveryoneCanEdit']
-                    UpdateEveryone=form.cleaned_data['UpdateEveryone']
-                    new_ctrl=models.Control(SessionNumber=SessionNumber,RegistrationEnabled=RegistrationEnabled,
-                    EveryoneCanSee=EveryoneCanSee,EveryoneCanEdit=EveryoneCanEdit,EveryoneCanRate=EveryoneCanRate,
-                    UpdateEveryone=UpdateEveryone)
-                    ctrl=new_ctrl
-            except:
-                RegistrationEnabled=form.cleaned_data['RegistrationEnabled']
-                EveryoneCanSee=form.cleaned_data['EveryoneCanSee']
-                EveryoneCanRate=form.cleaned_data['EveryoneCanRate']
-                EveryoneCanEdit=form.cleaned_data['EveryoneCanEdit']
-                UpdateEveryone=form.cleaned_data['UpdateEveryone']
-                new_ctrl=models.Control(SessionNumber=SessionNumber,RegistrationEnabled=RegistrationEnabled,
-                EveryoneCanSee=EveryoneCanSee,EveryoneCanEdit=EveryoneCanEdit,EveryoneCanRate=EveryoneCanRate,
-                UpdateEveryone=UpdateEveryone)
-                ctrl=new_ctrl
-            ctrl.updateOthers()
+
+            latest_ctrl = models.Control.objects.latest('updated_at')
+
+            #if same SessionNumber,then delete current object and create new
+            if (latest_ctrl is not None) and (SessionNumber == latest_ctrl.session_number):
+                latest_ctrl.delete()
+
+            registration_enabled = form.cleaned_data['registration_enabled']
+            everyone_can_rate = form.cleaned_data['everyone_can_rate']
+            everyone_can_edit = form.cleaned_data['everyone_can_edit']
+            update_everyone = form.cleaned_data['update_everyone']
+
+            ctrl = models.Control(session_number=SessionNumber, registration_enabled=registration_enabled,
+            everyone_can_edit=everyone_can_edit, everyone_can_rate=everyone_can_rate, update_everyone=update_everyone)
+
             ctrl.save()
+            ctrl.updateOthers()
+
             # idk why but just do it
             return redirect(self.request.path_info)
         else :
-            # print (form)
-            return render(request, self.template_name, {'logged_in':logged_in,'form':form, 'type':"Sudo", 'error_message': "Your Sudo form wasn't valid."})
+            return render(request, self.template_name, {'logged_in':self.logged_in, 'form':form, 'type':"Sudo", 'error_message': "Your Sudo form wasn't valid."})
 
 
 class UserDetailView(generic.DetailView):
@@ -180,172 +158,141 @@ class UserDetailView(generic.DetailView):
     form_class_update = forms.UserUpdateForm
     template_name = 'ratings/user.html'
 
-    def get(self, request,**kwargs):
-        logged_in=True
+    @method_decorator(login_required)
+    def get(self, request, **kwargs):
+        logged_in = True
 
-        def decrypt(encryptedqueryset,string='work'):
-            dictionary=encryptedqueryset.values(string)
-            trueworks=[]
+        def decrypt(encryptedqueryset, string='work'):
+            dictionary = encryptedqueryset.values(string)
+            trueworks = []
             for i in dictionary:
-                m=i.get(string)
+                m = i.get(string)
                 trueworks.append(m)
-            decryptworks=[]
+            decryptworks = []
             for i in trueworks:
-                n=signing.loads(i)
+                n = signing.loads(i)
                 decryptworks.append(n[0])
             return decryptworks
 
         uid = kwargs['uid'] # target user
-        if request.user :
+        if request.user:
             raterid = request.user.profile.userid
-            ratingFound = False
             try:
-                user = models.Profile.objects.get(userid=uid)
-                target_user = models.User.objects.get(username=uid)
-                full_name = target_user.first_name + " " + target_user.last_name
+                user_profile = models.Profile.objects.get(userid=uid)
+                user = models.User.objects.get(username=uid)
+                full_name = user.first_name + " " + user.last_name
             except ObjectDoesNotExist:
-                return render(request, error_template ,{'error': "The User with User Id : "+ uid +" does not exist."})
+                # Invalid username in get request
+                return render(request, error_template, {'error': "The User with User Id : "+ uid +" does not exist."})
+
             try:
-                ratings = models.Rating.objects.all().filter(user1=raterid).filter(user2=user).order_by('-updated_at')
-                reviews=decrypt(ratings,'review')
-                ratings = decrypt(ratings,'rating')
-
-
-                #ratings.append('lol')
-                #Have to decrypt it to show to the user.
-
-            except ObjectDoesNotExist:
-                current_rating = "Not yet rated by you. Rating Object after these filters doesn't exist."
-            try:
-                current_rating = ratings[0]
-                current_review = reviews[0]
-                ratingFound = True
-            except :
-                current_rating = "Not yet reviewed by you."
-                current_review="Not yet reviewed by you"
-            try :
-                works_together=[]
-                works = models.Work.objects.all().filter(user=user).order_by('-updated_at')#.values('work')
-                works=decrypt(works) # Works now consist of a list of decrypted works
-            except :
-                works = None
-            for t in range(len(works)): # starting part of the works will be grouped togetheer into a new list of dictionaries
-                j=works[t].split()
-                '''
-                if len(j)>5:
-                    start=""
-                    for m in range(4):
-                        start+=j[m]+" "
-                    start=start.rstrip(" ")
-                    start+="..."
+                ratings = models.Rating.objects.all().filter(user1=raterid).filter(user2=user_profile).order_by('-updated_at')
+                curr_control = models.Control.objects.latest('updated_at')
+                robj = ratings[0]
+                # print(str(curr_control.session_number) + " " + str(robj.session_number)) # Debug
+                if curr_control.session_number == robj.session_number:
+                    current_rating = signing.loads(decrypt(ratings, 'rating')[0])[0]
+                    current_review = decrypt(ratings, 'review')[0]
                 else:
-                '''
-                start=works[t]
-                works_together.append({'start':start,'work':works[t]})
-            rater = models.Profile.objects.get(userid = raterid)
-            if rater.canRate :
-                form = self.form_class(None)
-            else  :
-                form = None
-            # Get User Update Forms
-            if raterid == uid : #If on your own profile
-                form_work = self.form_class_work(None)
-                form_update = self.form_class_update(initial={'about':rater.about})
-            else :
-                form_work = None
-                form_update = None
+                    raise Exception
+            except:
+                # print("Either first time rate or no rating in present session") # Debug
+                current_rating = "Not yet reviewed by you."
+                current_review = "Not yet reviewed by you."
 
-            ratingFound = False if (uid == raterid) else ratingFound  #If on your own profile
-            current = True if (uid == raterid) else False   #If on your own profile
-            together = []
-            if(current):
+            try:
+                works = models.Work.objects.all().filter(user=user_profile).order_by('-updated_at') #.values('work')
+                decrypted_works = decrypt(works) # Works now consist of a list of decrypted works
+            except:
+                decrypted_works = None
+
+            rater = models.Profile.objects.get(userid=raterid)
+            if rater.can_rate:
+                form = self.form_class(None)
+            else:
+                form = None
+
+            # Get User Update Forms
+            form_work = self.form_class_work(None) if (uid == raterid) else None
+            form_update = self.form_class_update(initial={'about':rater.about}) if (uid == raterid) else None
+            current = True if (uid == raterid) else False   # If on your own profile
+
+            all_ratings = []
+            if(current and rater.can_see):
                 curr_ratings = models.Rating.objects.filter(user2=rater).order_by('-updated_at')
                 try:
-                    reviews=decrypt(curr_ratings,'review')
-                    ratings = decrypt(curr_ratings,'rating')
+                    reviews = decrypt(curr_ratings, 'review')
+                    ratings = decrypt(curr_ratings, 'rating')
+                    for j in range(len(reviews)):
+                        curr = signing.loads(ratings[j])[0]
+                        all_ratings.append({'rating':curr, 'review':reviews[j]})
                 except:
-                    reviews=None
-                    ratings=None
-                for j in range(len(reviews)):
-                    together.append({'rating':ratings[j],'review':reviews[j]})
+                    reviews = None
+                    ratings = None
 
-            return render(request, self.template_name, {'logged_in':logged_in,'works_together':works_together, 'user':user, 'name':full_name, 'current':current, 'current_rated':current_rating, 'works': works, 'ratingFound':ratingFound, 'form':form, 'workform':form_work, 'updateform':form_update, 'together':together, 'rater':rater,'current_review':current_review})
-
+            return render(request, self.template_name, {'logged_in':True, 'works_together':decrypted_works, 'user':user_profile, 'name':full_name, 'current':current, 'current_rated':current_rating, 'form':form, 'workform':form_work, 'updateform':form_update, 'together':all_ratings, 'rater':rater,'current_review':current_review})
         else:
-            try :
-                user = models.Profile.objects.get(userid=uid)
-                target_user = models.User.objects.get(username=uid)
-                full_name = target_user.first_name + " " + target_user.last_name
-            except ObjectDoesNotExist :
-                return render(request, error_template ,{'error': "The User with User Id : "+ uid +" does not exist."})
-            try :
-                works_together=[]
-                works = models.Work.objects.all().filter(user=user).order_by('-updated_at')#.values('work')
-                works=decrypt(works)
+            return render(request, error_template, {'error': "No such user exists. Please validate your request."})
 
-            except :
-                works = None
-            for t in range(len(works)): # starting part of the works will be grouped togetheer into a new list of dictionaries
-                j=works[t].split()
-                '''
-                if len(j)>5:
-                    start=""
-                    for m in range(4):
-                        start+=j[m]+" "
-                    start=start.rstrip(" ")
-                    start+="..."
-                else:
-                '''
-                start=works[t]
-                works_together.append({'start':start,'work':works[t]})
 
-            return render(request, self.template_name, {'logged_in':logged_in,'works_together':works_together, 'user':user, 'name':full_name, 'current':False, 'works':works})#,'decryptworks':decryptworks})
-
+    @method_decorator(login_required)
     def post(self, request, **kwargs):
         form = self.form_class(request.POST)
         workform = self.form_class_work(request.POST)
         updateform = self.form_class_update(request.POST)
-        logged_in=True
+        logged_in = True
         # avoid insecure access through postman
         try:
-            target = models.Profile.objects.get(userid = kwargs['uid'])
-            target_user = models.User.objects.get(username = kwargs['uid'])
+            target = models.Profile.objects.get(userid=kwargs['uid'])
+            target_user = models.User.objects.get(username=kwargs['uid'])
             full_name = target_user.first_name + " " + target_user.last_name
         except:
-            return render(request, error_template ,{'error': "Invalid Post Request."})
-        if request.user :
-            if form.is_valid() :
-                rnum = form.cleaned_data['rating']
-                rev = form.cleaned_data['review']
-                encryptedreview=signing.dumps((rev,))
-                rater = models.Profile.objects.get(userid = request.user.profile.userid)
-                full_name = target_user.first_name + " " + target_user.last_name
-                if kwargs['uid'] == None :
-                    return render( request, self.template_name , {'error_message': "Invalid User", 'form':form, 'user':target, 'name':full_name} )
-                elif kwargs['uid'] == request.user.profile.userid :
-                    return render( request, self.template_name , {'error_message': "You cannot rate yourself.", 'form':form, 'user':target, 'name':full_name} )
-                else :
-                    f = True
-                    try:
-                        ratings = models.Rating.objects.all().filter(user1=rater).filter(user2=target).order_by('-updated_at')
-                        robj = ratings[0]
-                        if (not robj.canEdit) :
-                            f = False
-                    except :
-                        f = False
+            return render(request, error_template, {'error': "Invalid Post Request."})
 
-                    if f :
-                        robj.rating = rnum
+        if request.user:
+            if form.is_valid():
+                rating = form.cleaned_data['rating']
+                review = form.cleaned_data['review']
+                encryptedrating = signing.dumps((rating,))
+                encryptedreview = signing.dumps((review,))
+                rater = models.Profile.objects.get(userid=request.user.profile.userid)
+                # print(rater) # Debug
+                # print(target) # Debug
+                if kwargs['uid'] == None:
+                    err = "Invalid User"
+                elif kwargs['uid'] == request.user.profile.userid:
+                    err = "You cannot rate yourself."
+                else:
+                    editRating, newRating = True, True
+                    curr_session = models.Control.objects.latest('updated_at')
+                    # print("Current session number: " + str(curr_session.session_number)) # Debug
+                    try:
+                        robj = models.Rating.objects.all().filter(user1=rater).filter(user2=target).order_by('-updated_at')[0]
+                        # print(robj) # Debug
+                        # print(curr_session.session_number) # Debug
+                        if curr_session.session_number == robj.session_number:
+                            newRating = False
+                        if (curr_session.session_number == robj.session_number) and (not robj.can_edit):
+                            editRating = False
+                    except:
+                        # print("Could not find rating object") # Debug
+                        editRating = False
+                    
+                    # print(str(newRating) + " " + str(editRating)) # Debug
+                    # Update rating object
+                    if newRating:
+                        robj = models.Rating(user1=rater, user2=target, rating=encryptedrating, review=encryptedreview,
+                                            can_edit=True, session_number=curr_session.session_number)
+                    elif editRating:
+                        robj.rating = encryptedrating
                         robj.review = encryptedreview
-                    else :
-                        robj = models.Rating(user1 = rater,
-                                            user2 = target,
-                                            rating=rnum,review=encryptedreview, canEdit = True)
                     robj.save()
-                return redirect(self.request.path_info)
-            elif updateform.is_valid() :
+                    return redirect(self.request.path_info)
+                return render(request, self.template_name, {'error_message': err, 'form':form, 'user':target, 'name':full_name})
+
+            elif updateform.is_valid():
                 about = updateform.cleaned_data['about']
-                user = models.Profile.objects.get(userid = request.user.profile.userid)
+                user = models.Profile.objects.get(userid=request.user.profile.userid)
                 user.about = about
                 user.save()
                 return redirect(self.request.path_info)
@@ -363,126 +310,22 @@ class UserDetailView(generic.DetailView):
                     new_work.save()
                 if onlychoices:
                     for each_delete in onlychoices:
-                            r=models.Work.objects.filter(user=user)
-                            works=r.values('work')
-                            trueworks=[]
-                            for i in works:
-                                m=i.get('work')
-                                trueworks.append(m)
-                            works=trueworks
-                            for i in range(len(works)):
-                                n=signing.loads(works[i])
-                                if each_delete==n[0]:
-                                    r[i].delete()
-                                    break
+                        r=models.Work.objects.filter(user=user)
+                        works=r.values('work')
+                        trueworks=[]
+                        for i in works:
+                            m=i.get('work')
+                            trueworks.append(m)
+                        works=trueworks
+                        for i in range(len(works)):
+                            n=signing.loads(works[i])
+                            if each_delete==n[0]:
+                                r[i].delete()
+                                break
                 return redirect(self.request.path_info)
 
             else :
                 # print (request.session['user_id'])
-                return render( request, self.template_name , {'error_message': "Ratings form wan't valid.", 'form':form, 'user':target_user, 'name':full_name} )
-        else :
-            return render( request, login_template , {'error_message': "You have to be logged in to rate.", 'form':form, 'user':target_user, 'name':full_name} )
-    # Get ratings for this user, rated by the session user
-    # Edit the user details if the user id of the current view is the same as the session user
-    # Edit the work details if the user id of the current view is the same as the session user
-
-    # Function to check if the user id of the current view is the same as the session user
-    def is_same_user(self,request):
-        if request.user:
-            user = models.User.objects.get(userid=request.GET.get('user','None'))
-            return (user.userid==request.user.profile.userid)
+                return render(request, self.template_name, {'error_message': "Ratings form wan't valid.", 'form':form, 'user':target_user, 'name':full_name} )
         else:
-            return False
-
-
-
-
-
-
-#  For Udit
-#  ---------------------------------Redundant Classes-------------------------------------
-# class LoginView(View):
-#     form_class = forms.LoginForm
-#     template_name = 'ratings/login.html'
-#     # Add user id to session variables
-#     def get(self,request):
-#         form = self.form_class(None)
-#         return render(request, self.template_name, {'form':form})
-# print("-----------------------------------------------------")
-# print (form) # this turned out to be null
-# # print (form.cleaned_data)
-# # print (form.cleaned_data['userid'])
-# # print (form.cleaned_data['password'])
-
-# if form.is_valid() :
-#     # form.save()
-#     uid = form.cleaned_data['userid']
-#     paswd = form.cleaned_data['password']
-#     try:
-#         uobj = models.User.objects.get(userid=uid)
-#         if(uobj):
-#             if(uobj.password == paswd) :
-#                 request.session['user_id'] = form.cleaned_data['userid']
-#                 return redirect('ratings:index')
-#             else :
-#                 return render(request, self.template_name, {'form': form ,'error_message': "Password doesn't match","type":"Login"})
-#         else :
-#             return render(request, self.template_name, {'form': form ,'error_message': "User doesn't exist.","type":"Login"})
-#     except ObjectDoesNotExist :
-#         return render(request, self.template_name, { 'form': form ,'error_message': "User ID doesn't exist.","type":"Login"})
-
-#     return redirect('ratings:index')
-# else :
-#     print("-----------------------------------------------------")
-#     print (form)
-#     # print (request.session['user_id'])
-#     return redirect('ratings:login')
-
-# class LogoutView(View):
-#     def get(self, request):
-#         try:
-#             if request.session['user_id']:
-#                 del request.session['user_id']
-#         except Exception:
-#             pass
-#         return redirect('ratings:login')
-
-# class RegisterView(View):
-#     form_class = forms.UserForm
-#     template_name = 'ratings/login.html'
-#     # Add user id to session variables
-#     def get(self,request):
-#         form = self.form_class(None)
-#         return render(request, self.template_name, {'form':form,'type':"Register"})
-
-#     def post(self,request):
-#         form = self.form_class(request.POST)
-
-#         if form.is_valid() :
-#             # form.save()
-#             fd = form.cleaned_data
-#             uobj = models.User(name=fd['name'],userid=fd['userid'],about=fd['about'],
-#                                 password=fd['password'],canSee=False,canRate=True)
-#             uobj.save()
-#             request.session['user_id'] = fd['userid']
-#             return redirect('ratings:index')
-#         else :
-#             return redirect('ratings:register')
-
-#     def post(self,request):
-#         username = request.POST['username']
-#         password = request.POST['password']
-#         print (username)
-#         print (password)
-#         user = User.objects.filter(username=request.POST['username'],password=request.POST['password'])
-#         if (user is not None):
-#             login(request,user)
-#             return redirect('ratings:index')
-#         else:
-#             print ("User is not found")
-#             return redirect('ratings:login')
-
-# class LogoutView(View):
-#     def get(self, request):
-#         logout(request)
-#         return redirect('ratings:user_list')
+            return render(request, login_template, {'error_message': "You have to be logged in to rate.", 'form':form, 'user':target_user, 'name':full_name} )

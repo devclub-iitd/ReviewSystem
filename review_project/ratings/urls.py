@@ -11,7 +11,7 @@ urlpatterns = [
     url(r'^login/$', auth_views.login, {'template_name': 'registration/login.html', 'extra_context':{'type':'Login','logged_in':False}}, name='login'),
     url(r'^logout/$', auth_views.logout, {'next_page': '/'}, name='logout'),
     url(r'^register/$', views.RegisterView.as_view() , name='register'),
-    url(r'^user/(?P<uid>\w+)/$',views.UserDetailView.as_view() , name='detail'),
+    url(r'^user/(?P<uid>\w+)/$', views.UserDetailView.as_view(), name='detail'),
     url(r'^leaderboard/$', views.LeaderBoardView.as_view(), name='leaderboard'),
     url(r'^sudo/$', views.SudoView.as_view(), name='sudo')
     ]
