@@ -49,7 +49,7 @@ class LeaderBoardView(View):
         curr_control = models.Control.objects.latest('updated_at')
 
         for i in object_list:
-            
+
 
             latest_work = i.get_latest_work()
             try:
@@ -65,10 +65,10 @@ class LeaderBoardView(View):
                 continue
             else:
                 robjs = models.Rating.objects.all().filter(session_number = curr_control.session_number).filter(user1=request.user.profile).filter(user2=object_list[j])
-                
-                rated = False if list(robjs) == [] else True 
+
+                rated = False if list(robjs) == [] else True
                 if (request.user.profile == object_list[j]):
-                    rated = True 
+                    rated = True
                 ele = {'profile':object_list[j],'short':loshortworks[j], 'unrated':not rated}
                 dict.append(ele)
 
@@ -288,7 +288,7 @@ class UserDetailView(generic.DetailView):
                     except:
                         # print("Could not find rating object") # Debug
                         editRating = False
-                    
+
                     # print(str(newRating) + " " + str(editRating)) # Debug
                     # Update rating object
                     if newRating:
@@ -340,3 +340,25 @@ class UserDetailView(generic.DetailView):
                 return render(request, self.template_name, {'error_message': "Ratings form wan't valid.", 'form':form, 'user':target_user, 'name':full_name} )
         else:
             return render(request, login_template, {'error_message': "You have to be logged in to rate.", 'form':form, 'user':target_user, 'name':full_name} )
+
+class editView(generic.DetailView):
+    form_class_work = forms.WorkForm
+    form_class_update = forms.UserUpdateForm
+    template_name = 'ratings/edit.html'
+    @method_decorator(login_required)
+    def get(self,request, **kwargs):
+        try:
+            user = request.user      #The logged in user
+            user_profile = models.Profile.objects.get(userid = user.profile.userid)
+        except:
+            return render(request,error_template,{'error':'Invalid User.'})
+
+        form_work = self.form_class_work(None)
+        form_update = self.form_class_update(initial={'about':user_profile.about})
+        print (user_profile.about)
+        return render(request,self.template_name,{'workform':form_work,'updateform':form_update})
+    def post(self,request):
+        form_work = self.form_class_work(request.POST)
+        form_update = self.form_class_update(request.POST)
+        #Add as required
+        return render(request,self.template_name,{'workform':form_work,'updateform':form_update})
