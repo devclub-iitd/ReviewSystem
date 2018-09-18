@@ -356,8 +356,8 @@ class editView(generic.DetailView):
         form_work = self.form_class_work(None)
         form_update = self.form_class_update(initial={'about':user_profile.about})
         print (user_profile.about)
-        return render(request,self.template_name,{'workform':form_work,'updateform':form_update})
-    def post(self,request):
+        return render(request,self.template_name,{'user':user_profile,'workform':form_work,'updateform':form_update})
+    def post(self,request, **kwargs):
         form_work = self.form_class_work(request.POST)
         form_update = self.form_class_update(request.POST)
         #Add as required

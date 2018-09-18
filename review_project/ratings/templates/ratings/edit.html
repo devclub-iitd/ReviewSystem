@@ -6,29 +6,27 @@
 <span class="icon-bar">Home</span>
 <span class="icon-bar">Users</span>
 {% endblock %}
+
+
 {% block body %}
-{% for field in workform %}
+<br>
 
+<form class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">
+{% csrf_token %}
+{% include 'ratings/genericForm.html' with form=workform %}
+<div class="col-sm-offset-2">
+    <button type="submit" class="btn btn-success">Save</button>
+</div>
+</form>
+
+<form  class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% include 'ratings/genericForm.html' with form=updateform %}
     <div class="form-group row">
-        <div class="col-sm-offset-2 col-sm-10">
-            <span class="text-danger small">{{ field.errors }}</span>
+        <div class="col-sm-offset-2">
+            <button type="submit" class="btn btn-success">Save</button>
         </div>
-        <label class="col-sm-4 col-form-label font-lora">{{ field.label_tag }}</label>
-        <div class="col-sm-8">{{ field }}</div>
     </div>
-
-{% endfor %}
-
-{% for field in updateform %}
-
-    <div class="form-group row">
-        <div class="col-sm-offset-2 col-sm-10">
-            <span class="text-danger small">{{ field.errors }}</span>
-        </div>
-        <label class="col-sm-4 col-form-label font-lora">{{ field.label_tag }}</label>
-        <div class="col-sm-8">{{ field }}</div>
-    </div>
-
-{% endfor %}
+</form>
 
 {% endblock %}
