@@ -10,6 +10,18 @@
 
 {% block body %}
 <br>
+<div class="row" >
+<div class="col-sm-3">
+Works:
+</div>
+<div class="col-sm-9">
+{% for work in works %}
+<div class="work-card card">
+{{work}}
+</div>
+{% endfor %}
+</div>
+</div>
 
 <form class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">
 {% csrf_token %}

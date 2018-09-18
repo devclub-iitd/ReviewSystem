@@ -345,18 +345,35 @@ class editView(generic.DetailView):
     form_class_work = forms.WorkForm
     form_class_update = forms.UserUpdateForm
     template_name = 'ratings/edit.html'
+
     @method_decorator(login_required)
     def get(self,request, **kwargs):
+
+        def decrypt(encryptedqueryset, string='work'):
+            dictionary = encryptedqueryset.values(string)
+            trueworks = []
+            for i in dictionary:
+                m = i.get(string)
+                trueworks.append(m)
+            decryptworks = []
+            for i in trueworks:
+                n = signing.loads(i)
+                decryptworks.append(n[0])
+            return decryptworks
+
         try:
             user = request.user      #The logged in user
             user_profile = models.Profile.objects.get(userid = user.profile.userid)
         except:
             return render(request,error_template,{'error':'Invalid User.'})
-
+        try:
+            works = models.Work.objects.all().filter(user=user_profile).order_by('-updated_at') #.values('work')
+            decrypted_works = decrypt(works) # Works now consist of a list of decrypted works
+        except:
+            decrypted_works = None
         form_work = self.form_class_work(None)
         form_update = self.form_class_update(initial={'about':user_profile.about})
-        print (user_profile.about)
-        return render(request,self.template_name,{'user':user_profile,'workform':form_work,'updateform':form_update})
+        return render(request,self.template_name,{'user':user_profile,'workform':form_work,'updateform':form_update,'works':decrypted_works})
     def post(self,request, **kwargs):
         form_work = self.form_class_work(request.POST)
         form_update = self.form_class_update(request.POST)
