@@ -14,17 +14,17 @@ body{
 }
 
 .center-small{
-    width: 60%; 
+    width: 60%;
     max-width: 800px;
     padding: auto;
 }
 
 .center-small{
-    margin: 100px auto;    
+    margin: 100px auto;
 }
 
 .center-large{
-    margin: 20px auto;    
+    margin: 20px auto;
 }
 
 .right-large {
@@ -77,13 +77,13 @@ body{
     overflow-x: auto;
     white-space: nowrap;
     width: 100%;
-    flex-direction: row !important;    
+    flex-direction: row !important;
     padding: 5px;
     margin: 10px 0px;
 }
 
 .work-card {
-    display: inline-block !important;
+    display: inline-block;
     /* width: 50%; */
     white-space: pre-wrap;
     width: 250px;

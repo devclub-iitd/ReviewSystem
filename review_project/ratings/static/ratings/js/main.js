@@ -22,7 +22,7 @@ $(document).ready(function(){
       $(".long_work").hide();
       //alert($(".actual_work").text());
     });
-    
+
     $(".actual_work").on("click",function(){
       $(".long_work").show();
       $(".actual_work").hide();
@@ -34,5 +34,13 @@ $(document).ready(function(){
     });
     $(".long_work").mouseout(function(){
       $(this).css('color','black');
+    });
+    $(".close-icon").mouseover(function(){
+      $(this).css('cursor','pointer');
+    });
+    $(".close-icon").on("click",function(){
+      $(this).closest(".work-card").hide();
+      
+
     });
 });

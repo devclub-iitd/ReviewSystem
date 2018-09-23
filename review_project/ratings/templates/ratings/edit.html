@@ -6,21 +6,21 @@
 <span class="icon-bar">Home</span>
 <span class="icon-bar">Users</span>
 {% endblock %}
-
-
 {% block body %}
 <br>
 <div class="row" >
-<div class="col-sm-3">
-Works:
-</div>
-<div class="col-sm-9">
-{% for work in works %}
-<div class="work-card card">
-{{work}}
-</div>
-{% endfor %}
-</div>
+  <div class="col-sm-3">
+    Works:
+  </div>
+
+  <div class="col-sm-9">
+    {% for work in works %}
+      <div class="card work-card">
+        <span class="close-icon " data-effect="fadeOut" ><i class="far fa-times-circle"></i></span>
+        {{work}}
+      </div>
+    {% endfor %}
+  </div>
 </div>
 
 <form class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">
