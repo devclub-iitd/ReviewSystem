@@ -341,7 +341,7 @@ class UserDetailView(generic.DetailView):
         else:
             return render(request, login_template, {'error_message': "You have to be logged in to rate.", 'form':form, 'user':target_user, 'name':full_name} )
 
-class editView(generic.DetailView):
+class EditView(generic.DetailView):
     form_class_work = forms.WorkForm
     form_class_update = forms.UserUpdateForm
     template_name = 'ratings/edit.html'
@@ -371,9 +371,11 @@ class editView(generic.DetailView):
             decrypted_works = decrypt(works) # Works now consist of a list of decrypted works
         except:
             decrypted_works = None
+
         form_work = self.form_class_work(None)
         form_update = self.form_class_update(initial={'about':user_profile.about})
         return render(request,self.template_name,{'user':user_profile,'workform':form_work,'updateform':form_update,'works':decrypted_works})
+    
     def post(self,request, **kwargs):
         form_work = self.form_class_work(request.POST)
         form_update = self.form_class_update(request.POST)

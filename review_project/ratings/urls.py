@@ -14,5 +14,5 @@ urlpatterns = [
     url(r'^user/(?P<uid>\w+)/$', views.UserDetailView.as_view(), name='detail'),
     url(r'^leaderboard/$', views.LeaderBoardView.as_view(), name='leaderboard'),
     url(r'^sudo/$', views.SudoView.as_view(), name='sudo'),
-    url(r'^user/(?P<uid>\w+)/edit$',views.editView.as_view(), name='editprofile')
+    url(r'^user/(?P<uid>\w+)/edit$',views.EditView.as_view(), name='editprofile')
     ]
