@@ -379,7 +379,7 @@ class EditView(generic.DetailView):
     def post(self,request, **kwargs):
         form_work = self.form_class_work(request.POST)
         form_update = self.form_class_update(request.POST)
-        delWorkList = request.POST.get('work_delete')
+        delWorkList =  request.POST.get('drink')
         print (delWorkList)
         #Add as required
         return render(request,self.template_name,{'workform':form_work,'updateform':form_update})
