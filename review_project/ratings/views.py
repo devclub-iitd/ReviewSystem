@@ -377,9 +377,31 @@ class EditView(generic.DetailView):
         return render(request,self.template_name,{'user':user_profile,'workform':form_work,'updateform':form_update,'works':decrypted_works})
 
     def post(self,request, **kwargs):
+
+        def decrypt(encryptedqueryset, string='work'):
+            dictionary = encryptedqueryset.values(string)
+            trueworks = []
+            for i in dictionary:
+                m = i.get(string)
+                trueworks.append(m)
+            decryptworks = []
+            for i in trueworks:
+                n = signing.loads(i)
+                decryptworks.append(n[0])
+            return decryptworks
+
         form_work = self.form_class_work(request.POST)
         form_update = self.form_class_update(request.POST)
-        delWorkList =  request.POST.get('drink')
-        print (delWorkList)
+        try:
+            user = request.user      #The logged in user
+            user_profile = models.Profile.objects.get(userid = user.profile.userid)
+        except:
+            pass
+        del_work =  request.POST.get('work_delete')
+        all_works = models.Work.objects.filter(user = user_profile)
+        decrypted_works = decrypt(all_works)
+        for index in range(len(decrypted_works)):
+            if del_work == decrypted_works[index]:
+                all_works[index].delete()
         #Add as required
         return render(request,self.template_name,{'workform':form_work,'updateform':form_update})

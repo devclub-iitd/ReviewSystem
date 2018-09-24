@@ -46,7 +46,7 @@ $(document).ready(function(){
 });
 function delete_work(work) {
     var csrftoken = Cookies.get('csrftoken');
-    console.log("create post is working!"); // sanity check
+    //console.log("create post is working!"); // sanity check
     $.ajax({
       url:"", //Enter the url of Edit View's POST,
       type: "POST",
@@ -54,12 +54,6 @@ function delete_work(work) {
       data: {
         work_delete :work,
         csrfmiddlewaretoken : csrftoken,
-      },
-      success: function(){
-        console.log("Successsful Ajax");
-      },
-      error: function(){
-        console.log("Unsuccessful Ajax");
       }
     });
 };
