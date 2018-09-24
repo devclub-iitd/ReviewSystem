@@ -16,7 +16,7 @@
   <div class="col-sm-9">
     {% for work in works %}
       <div class="card work-card">
-        <span class="close-icon " data-effect="fadeOut" ><i class="far fa-times-circle"></i></span>
+        <span class="close-icon " data-effect="fadeOut" id = "{{work}}"><i class="far fa-times-circle"></i></span>
         {{work}}
       </div>
     {% endfor %}
@@ -31,7 +31,7 @@
 </div>
 </form>
 
-<form  class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data">
+<form  class="form-horizontal right-large" action="" method="post" enctype="multipart/form-data" id ="post-form">
     {% csrf_token %}
     {% include 'ratings/genericForm.html' with form=updateform %}
     <div class="form-group row">

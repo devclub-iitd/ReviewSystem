@@ -40,7 +40,27 @@ $(document).ready(function(){
     });
     $(".close-icon").on("click",function(){
       $(this).closest(".work-card").hide();
-      
-
+      delete_work();
     });
 });
+function delete_work() {
+    console.log("create post is working!"); // sanity check
+    //console.log($('#post-text').val());
+    var work = $(this).attr('id');
+    console.log( '{{ csrf_token }}' );
+    $.ajax({
+      url:"", //Enter the url of Edit View's POST,
+      type: "POST",
+      dataType: "json",
+      data: {
+        "work_delete" :work,
+        "csrfmiddlewaretoken" :'{{ csrf_token }}',
+      },
+      success: function(){
+        console.log("Successsful Ajax");
+      },
+      error: function(){
+        console.log("Unsuccessful Ajax");
+      }
+    });
+};

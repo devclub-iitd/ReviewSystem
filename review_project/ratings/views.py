@@ -375,9 +375,11 @@ class EditView(generic.DetailView):
         form_work = self.form_class_work(None)
         form_update = self.form_class_update(initial={'about':user_profile.about})
         return render(request,self.template_name,{'user':user_profile,'workform':form_work,'updateform':form_update,'works':decrypted_works})
-    
+
     def post(self,request, **kwargs):
         form_work = self.form_class_work(request.POST)
         form_update = self.form_class_update(request.POST)
+        delWorkList = request.POST.get('work_delete')
+        print (delWorkList)
         #Add as required
         return render(request,self.template_name,{'workform':form_work,'updateform':form_update})
